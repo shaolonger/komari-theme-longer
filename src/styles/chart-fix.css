@@ -1,0 +1,102 @@
+/* Fix for Line chart ghosting and shadow jittering issues */
+
+/* Force hardware acceleration and proper repaint for Line components */
+.recharts-line-curve {
+  will-change: auto; /* Changed from 'd' to 'auto' to reduce jittering */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Disable any filters that might cause jittering */
+  filter: none !important;
+}
+
+/* Create new stacking context for Line layers */
+.recharts-layer.recharts-line {
+  isolation: isolate;
+  contain: layout style paint;
+}
+
+/* Ensure proper cleanup of Line paths */
+.recharts-line path {
+  shape-rendering: geometricPrecision;
+  vector-effect: non-scaling-stroke;
+  /* Remove any shadows or filters */
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+/* Fix for ComposedChart specifically */
+.recharts-composed-chart .recharts-line-curve {
+  opacity: 1 !important;
+  fill: none !important;
+  filter: none !important;
+}
+
+/* Prevent overlapping issues */
+.recharts-surface {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Ensure proper layer ordering */
+.recharts-layer {
+  pointer-events: none;
+}
+
+/* Clean transitions and animations */
+.recharts-line-curve,
+.recharts-area-curve {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Fix for specific chart containers */
+.recharts-wrapper {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Disable SVG filters on Line mode to prevent jittering */
+.recharts-line {
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+/* Remove box-shadow animations that might cause jittering */
+.recharts-line * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Stabilize rendering */
+.recharts-cartesian-axis-tick,
+.recharts-cartesian-axis-tick-value {
+  will-change: auto;
+}
+
+/* Specific fixes for Line chart mode to prevent jittering */
+.chart-line .recharts-line-curve,
+.chart-line .recharts-line path {
+  filter: none !important;
+  -webkit-filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  will-change: auto !important;
+}
+
+/* Remove all animations in Line mode */
+.chart-line * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Optimize rendering for Line mode */
+.chart-line .recharts-surface {
+  shape-rendering: crispEdges;
+}
+
+/* Composed chart Line elements - no shadows */
+.chart-composed .recharts-line-curve {
+  filter: none !important;
+  -webkit-filter: none !important;
+}

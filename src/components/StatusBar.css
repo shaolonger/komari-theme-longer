@@ -1,0 +1,270 @@
+/* Status Bar Container */
+.status-bar-container {
+  background: var(--color-background);
+  border: 1px solid var(--gray-a5);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Status Card Styles */
+.status-card {
+  position: relative;
+  background: var(--gray-a2);
+  border: 1px solid var(--gray-a4);
+  transition: all 0.2s ease;
+  padding: 0.875rem;
+  height: 100%;
+}
+
+.status-card:hover {
+  background: var(--gray-a3);
+  border-color: var(--gray-a6);
+}
+
+/* Icon animations */
+.status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--gray-a3);
+  transition: background 0.2s ease;
+}
+
+.status-card:hover .status-icon-wrapper {
+  background: var(--gray-a4);
+}
+
+/* Breathing light effect for online status */
+@keyframes breathing {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Simple pulse animation */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.animate-ping {
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+
+/* Network speed chart styling */
+.status-speed .status-value {
+  padding: 0;
+}
+
+/* Chart hover effects */
+.recharts-line {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.recharts-tooltip-wrapper {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+/* Progress bar animation */
+.status-online .bg-green-9 {
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+
+/* Status cards grid - desktop uses flex, mobile uses grid */
+.status-cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.status-card-wrapper {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Speed card should be wider on desktop */
+.status-speed-wrapper {
+  flex: 1.5 1 0;
+  min-width: 0;
+}
+
+/* Mobile responsive - switch to grid layout */
+@media (max-width: 640px) {
+  .status-bar-container {
+    margin: 0.5rem;
+    padding: 0.5rem !important;
+  }
+
+  .status-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .status-card-wrapper {
+    min-width: 0;
+    max-width: none;
+  }
+
+  /* Speed card takes full width on mobile */
+  .status-speed-wrapper {
+    grid-column: 1 / -1;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .status-card {
+    padding: 0.5rem;
+    min-height: 4rem !important;
+  }
+
+  .status-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .status-icon svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .status-card .status-value {
+    font-size: 0.85rem !important;
+    line-height: 1.2;
+    margin-top: 0.25rem;
+  }
+
+  .status-card .status-subtitle {
+    margin-top: 0.25rem;
+    font-size: 0.7rem;
+  }
+
+  /* Smaller text for title on mobile */
+  .status-card .rt-Text {
+    font-size: 0.65rem !important;
+  }
+
+  /* Hide progress bar on mobile for online status */
+  .status-online .status-subtitle {
+    display: none;
+  }
+
+  /* Settings button position on mobile */
+  .status-settings-button {
+    top: 0.25rem !important;
+    right: 0.25rem !important;
+  }
+}
+
+/* Small desktop / Tablet - prevent cards from being too small */
+@media (min-width: 641px) and (max-width: 1200px) {
+  .status-card-wrapper {
+    flex: 1 1 calc(33.333% - 0.75rem);
+    min-width: 0;
+  }
+
+  .status-speed-wrapper {
+    flex: 1 1 calc(33.333% - 0.75rem);
+    min-width: 0;
+  }
+}
+
+/* Large desktop - 5 cards in one row */
+@media (min-width: 1201px) {
+  .status-card-wrapper {
+    flex: 1 1 calc(20% - 0.75rem);
+    min-width: 0;
+  }
+
+  .status-speed-wrapper {
+    flex: 1.5 1 calc(20% - 0.75rem);
+    min-width: 0;
+  }
+}
+
+
+/* Smooth number transitions */
+.status-value {
+  letter-spacing: 0.01em;
+}
+
+/* Loading skeleton animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.status-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--gray-3) 0%,
+    var(--gray-4) 50%,
+    var(--gray-3) 100%
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* Switch animations for settings */
+@keyframes switch-on {
+  0% {
+    transform: translateX(2px) scale(0.9);
+  }
+  50% {
+    transform: translateX(10px) scale(1.1);
+  }
+  100% {
+    transform: translateX(18px) scale(1);
+  }
+}
+
+@keyframes switch-off {
+  0% {
+    transform: translateX(18px) scale(0.9);
+  }
+  50% {
+    transform: translateX(10px) scale(1.1);
+  }
+  100% {
+    transform: translateX(2px) scale(1);
+  }
+}

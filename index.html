@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>
+      // Dynamically set the language attribute based on user preferences
+      (function() {
+        // Check localStorage for saved language preference
+        const savedLang = localStorage.getItem('i18nextLng');
+        
+        // If no saved language, detect from browser
+        let lang = savedLang || navigator.language || navigator.userLanguage || 'en';
+        
+        // Normalize language code (e.g., zh-CN -> zh)
+        const primaryLang = lang.split('-')[0];
+        
+        // Set the HTML lang attribute
+        document.documentElement.lang = primaryLang;
+        
+        // Update the lang attribute whenever language changes
+        window.addEventListener('languagechange', function() {
+          const currentLang = localStorage.getItem('i18nextLng') || navigator.language || 'en';
+          document.documentElement.lang = currentLang.split('-')[0];
+        });
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <meta name="description" content="Komari Theme Nebula - An exquisite cosmic neon theme with interactive 3D dynamic particles." />
+    <meta
+      name="keywords"
+      content="server monitor, Komari Monitor, Nebula Theme, server performance dashboard"
+    />
+    <meta name="author" content="longer & Antigravity" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0d0b21" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Komari Nebula" />
+    <link rel="apple-touch-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.ico" />
+    
+    <meta property="og:title" content="Komari Theme Nebula" />
+    <meta property="og:description" content="An exquisite cosmic neon theme with interactive 3D dynamic particles." />
+    <!-- <meta property="og:image" content="/images/komari-preview.png" /> -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Komari Theme Nebula" />
+    <meta name="twitter:description" content="An exquisite cosmic neon theme with interactive 3D dynamic particles." />
+    <!-- <meta name="twitter:image" content="/images/komari-preview.png" /> -->
+    <title>Komari Theme Nebula</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

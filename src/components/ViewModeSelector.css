@@ -1,0 +1,266 @@
+/* ViewModeSelector Styles */
+
+/* ==================== LIGHT MODE (DEFAULT) ==================== */
+/* Default styles for light mode - transparent backgrounds */
+.view-mode-trigger {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-12);
+}
+
+.view-mode-trigger:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.view-mode-trigger:active {
+  transform: translateY(0);
+}
+
+.view-mode-dropdown {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+}
+
+.view-mode-item {
+  position: relative;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: var(--gray-12);
+}
+
+.view-mode-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+  transform: translateX(2px);
+}
+
+.view-mode-item[data-selected="true"] {
+  background: linear-gradient(90deg, rgba(96, 165, 250, 0.08) 0%, rgba(96, 165, 250, 0.04) 100%);
+  border-left: 2px solid var(--accent-9);
+  padding-left: calc(0.5rem - 2px);
+}
+
+.view-mode-item[data-selected="true"] .view-mode-text {
+  color: var(--accent-11);
+  font-weight: 600;
+}
+
+.view-mode-item[data-selected="true"]:hover {
+  background: linear-gradient(90deg, rgba(96, 165, 250, 0.12) 0%, rgba(96, 165, 250, 0.06) 100%);
+}
+
+.view-mode-check-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(96, 165, 250, 0.15);
+}
+
+/* ==================== DARK MODE ==================== */
+/* Dark mode using multiple selectors for better coverage */
+
+/* Method 1: Class-based selectors */
+.dark .view-mode-trigger,
+.dark-theme .view-mode-trigger,
+[class*="dark"] .view-mode-trigger {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .view-mode-trigger:hover,
+.dark-theme .view-mode-trigger:hover,
+[class*="dark"] .view-mode-trigger:hover {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Method 2: Using Radix UI CSS variables to detect dark theme */
+/* When Radix UI is in dark mode, --color-background changes */
+@supports (background: rgb(from var(--color-background) r g b)) {
+  .view-mode-dropdown {
+    background: var(--color-background);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--gray-5);
+  }
+  
+  .view-mode-item:hover {
+    background: var(--gray-3);
+  }
+}
+
+/* Fallback for dropdown in dark mode with multiple selectors */
+.dark .view-mode-dropdown,
+.dark-theme .view-mode-dropdown,
+[class*="dark"] .view-mode-dropdown,
+.theme-root.dark .view-mode-dropdown,
+.radix-themes.dark .view-mode-dropdown {
+  background: rgba(20, 20, 20, 0.98) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .view-mode-item:hover,
+.dark-theme .view-mode-item:hover,
+[class*="dark"] .view-mode-item:hover,
+.theme-root.dark .view-mode-item:hover,
+.radix-themes.dark .view-mode-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .view-mode-item[data-selected="true"],
+.dark-theme .view-mode-item[data-selected="true"],
+[class*="dark"] .view-mode-item[data-selected="true"],
+.theme-root.dark .view-mode-item[data-selected="true"],
+.radix-themes.dark .view-mode-item[data-selected="true"] {
+  background: linear-gradient(90deg, rgba(96, 165, 250, 0.15) 0%, rgba(96, 165, 250, 0.05) 100%) !important;
+  border-left: 2px solid rgb(96, 165, 250);
+}
+
+.dark .view-mode-item[data-selected="true"] .view-mode-text,
+.dark-theme .view-mode-item[data-selected="true"] .view-mode-text,
+[class*="dark"] .view-mode-item[data-selected="true"] .view-mode-text,
+.theme-root.dark .view-mode-item[data-selected="true"] .view-mode-text,
+.radix-themes.dark .view-mode-item[data-selected="true"] .view-mode-text {
+  color: rgb(147, 197, 253);
+}
+
+.dark .view-mode-item[data-selected="true"]:hover,
+.dark-theme .view-mode-item[data-selected="true"]:hover,
+[class*="dark"] .view-mode-item[data-selected="true"]:hover,
+.theme-root.dark .view-mode-item[data-selected="true"]:hover,
+.radix-themes.dark .view-mode-item[data-selected="true"]:hover {
+  background: linear-gradient(90deg, rgba(96, 165, 250, 0.2) 0%, rgba(96, 165, 250, 0.1) 100%) !important;
+}
+
+.dark .view-mode-check-wrapper,
+.dark-theme .view-mode-check-wrapper,
+[class*="dark"] .view-mode-check-wrapper,
+.theme-root.dark .view-mode-check-wrapper,
+.radix-themes.dark .view-mode-check-wrapper {
+  background: rgba(96, 165, 250, 0.2);
+}
+
+/* ==================== MOBILE RESPONSIVE ==================== */
+/* Mobile size adjustments only - no color changes */
+@media (max-width: 640px) {
+  .view-mode-trigger {
+    width: 100%;
+    min-width: 100%;
+    font-size: 0.875rem;
+  }
+  
+  .view-mode-dropdown {
+    width: 90vw;
+    max-width: 90vw;
+  }
+  
+  .view-mode-item {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* ==================== ANDROID CHROME 特殊修复 ==================== */
+/* 安卓Chrome在处理backdrop-filter + border-radius时存在渲染问题 */
+@supports (-webkit-backdrop-filter: blur(1px)) {
+  @media (max-width: 768px) {
+    /* 检测移动端 */
+    .view-mode-trigger {
+      /* 在移动端减弱blur效果,改善边框圆角显示 */
+      backdrop-filter: blur(4px) !important;
+      -webkit-backdrop-filter: blur(4px) !important;
+      /* 添加更强的边框以增强圆角可见性 */
+      border-width: 1.5px !important;
+      /* 确保圆角正确渲染 */
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      will-change: transform;
+    }
+  }
+}
+
+/* ==================== ANIMATIONS ==================== */
+/* Icon animations */
+.view-mode-icon {
+  transition: transform 0.2s ease;
+}
+
+.view-mode-trigger:hover .view-mode-icon {
+  transform: scale(1.1);
+}
+
+/* Chevron animation */
+.view-mode-chevron {
+  transition: transform 0.2s ease;
+}
+
+.view-mode-trigger[data-state="open"] .view-mode-chevron {
+  transform: rotate(180deg);
+}
+
+/* Check icon animation */
+@keyframes checkIn {
+  0% {
+    transform: scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+.view-mode-check {
+  animation: checkIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ==================== UTILITY STYLES ==================== */
+/* Keyboard shortcut hint */
+.view-mode-hint {
+  opacity: 0.6;
+  font-size: 0.75rem;
+  transition: opacity 0.2s ease;
+}
+
+.view-mode-dropdown:hover .view-mode-hint {
+  opacity: 0.8;
+}
+
+/* Loading state */
+.view-mode-loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Transition between views */
+@keyframes viewModeChange {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.view-mode-content {
+  animation: viewModeChange 0.3s ease-out;
+}

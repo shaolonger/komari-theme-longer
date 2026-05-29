@@ -1,0 +1,219 @@
+/* 桌面端图表样式优化 */
+.desktop-chart-wrapper {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* 时间选择器容器 */
+.desktop-timeline-selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.desktop-timeline-selector::-webkit-scrollbar {
+  height: 6px;
+}
+
+.desktop-timeline-selector::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.desktop-timeline-selector::-webkit-scrollbar-thumb {
+  background-color: var(--gray-a6);
+  border-radius: 3px;
+}
+
+/* 图表网格布局 - 3列布局与移动端保持一致 */
+.desktop-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  width: 100%;
+}
+
+/* 2列布局用于较窄的屏幕 */
+@media (max-width: 1200px) {
+  .desktop-chart-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 图表卡片样式 */
+.desktop-chart-card {
+  background: var(--color-panel-solid);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--gray-a4);
+  transition: all 0.2s ease;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.desktop-chart-card:hover {
+  border-color: var(--gray-a6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 图表头部 */
+.desktop-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--gray-a3);
+}
+
+.desktop-chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-12);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.desktop-chart-value {
+  font-size: 0.875rem;
+  color: var(--gray-11);
+  text-align: right;
+  font-weight: 500;
+}
+
+/* 图表容器 */
+.desktop-chart-container {
+  flex: 1;
+  margin: 0 -8px;
+  min-height: 0;
+}
+
+/* 自定义 Tooltip - 使用纯色背景确保最佳兼容性 */
+.desktop-chart-tooltip {
+  background: rgba(0, 0, 0, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 8px;
+  padding: 0.75rem !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.desktop-chart-tooltip .tooltip-time {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.desktop-chart-tooltip .tooltip-item {
+  color: white;
+  font-size: 0.875rem;
+  margin: 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.desktop-chart-tooltip .tooltip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* 图表样式优化 */
+.desktop-chart-container .recharts-cartesian-grid-horizontal line {
+  stroke: var(--gray-a3);
+  stroke-dasharray: 2 4;
+  opacity: 0.5;
+}
+
+.desktop-chart-container .recharts-cartesian-grid-vertical line {
+  display: none;
+}
+
+.desktop-chart-container .recharts-cartesian-axis-line {
+  stroke: transparent;
+}
+
+.desktop-chart-container .recharts-cartesian-axis-tick-line {
+  stroke: transparent;
+}
+
+.desktop-chart-container .recharts-cartesian-axis-tick-value {
+  fill: var(--gray-9);
+  font-size: 0.625rem;
+  font-weight: 500;
+}
+
+.desktop-chart-container .recharts-xAxis .recharts-cartesian-axis-tick-value {
+  fill: var(--gray-8);
+}
+
+.desktop-chart-container .recharts-yAxis .recharts-cartesian-axis-tick-value {
+  fill: var(--gray-8);
+}
+
+.desktop-chart-container .recharts-tooltip-cursor {
+  stroke: var(--gray-a6);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+/* 加载和错误状态 */
+.desktop-chart-loading,
+.desktop-chart-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  font-size: 0.875rem;
+}
+
+.desktop-chart-loading {
+  color: var(--gray-9);
+}
+
+.desktop-chart-error {
+  color: var(--red-9);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .desktop-chart-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .desktop-chart-card {
+    height: 180px;
+  }
+}
+
+/* 移动端网格布局 */
+@media (max-width: 640px) {
+  .desktop-chart-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .desktop-chart-card {
+    height: 160px;
+  }
+}
+
+/* 深色模式优化 */
+[data-theme="dark"] .desktop-chart-card {
+  background: var(--gray-a2);
+  border-color: var(--gray-a5);
+}
+
+[data-theme="dark"] .desktop-chart-card:hover {
+  border-color: var(--gray-a7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .desktop-chart-header {
+  border-bottom-color: var(--gray-a4);
+}

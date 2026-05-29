@@ -1,0 +1,321 @@
+/* Modern Card 性能优化样式 */
+
+/* 使用 contain 属性限制重排影响范围 */
+.modern-card-wrapper {
+  contain: layout style paint;
+  will-change: auto;
+  isolation: isolate;
+  position: relative; /* 确保创建层叠上下文 */
+}
+
+/* 网格容器基础样式 */
+.modern-grid-container {
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+/* 确保网格项目有正确的初始布局 */
+.modern-grid-container > div {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* 移除或减少动画 */
+.modern-card {
+  /* 使用 transform 代替其他属性实现动画，避免重排 */
+  transform: translateZ(0); /* 开启硬件加速 */
+  backface-visibility: hidden; /* 避免闪烁 */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 优化 hover 效果 - 只使用 transform 和 opacity */
+.modern-card-hover {
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+.modern-card-hover:hover {
+  transform: translateY(-2px) translateZ(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 禁用 Firefox 下的 backdrop-filter */
+@-moz-document url-prefix() {
+  .modern-card {
+    backdrop-filter: none !important;
+  }
+  
+  /* Firefox虚拟滚动容器修复 */
+  .virtual-scroll-container {
+    min-height: 600px !important;
+    contain: layout style !important;
+    /* 确保Firefox正确计算高度 */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .virtual-scroll-container > div {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+/* 优化进度条 - 使用 CSS 变量 */
+.usage-fill-modern {
+  width: var(--progress-width, 0%);
+  background: linear-gradient(
+    90deg,
+    var(--progress-color, #10b981) 0%,
+    color-mix(in srgb, var(--progress-color, #10b981) 87%, transparent) 100%
+  );
+  box-shadow: 0 0 10px color-mix(in srgb, var(--progress-color, #10b981) 40%, transparent);
+  transition: width 0.15s ease-out;
+  transform: translateZ(0);
+  will-change: width;
+}
+
+/* 使用 CSS Grid 替代 Flexbox 减少重排 */
+.modern-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+/* 优化标签动画 */
+.tag-scale-modern {
+  transform-origin: left center;
+  transition: none; /* 移除动画 */
+  position: relative; /* 确保标签不受背景影响 */
+  z-index: 2; /* 高于背景层 */
+}
+
+/* 减少阴影复杂度 */
+.modern-card-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* 使用 CSS 变量缓存常用值 */
+.modern-card {
+  --card-padding: 1rem;
+  --card-gap: 0.5rem;
+  --card-radius: 0.75rem;
+  --progress-transition: width 0.15s ease-out;
+}
+
+/* 优化文本渲染 */
+.modern-card-text {
+  text-rendering: optimizeSpeed;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 禁用不必要的动画 */
+@media (prefers-reduced-motion: reduce) {
+  .modern-card * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 虚拟滚动容器优化 */
+.virtual-scroll-container {
+  contain: strict;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+/* 虚拟滚动平滑度优化 */
+.virtual-scroll-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-track {
+  background: var(--accent-3);
+  border-radius: 4px;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--accent-6);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-7);
+}
+
+/* Firefox 滚动条样式 */
+.virtual-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-6) var(--accent-3);
+}
+
+/* 优化大列表性能 */
+.node-list-optimized {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px; /* 设置默认高度估计 */
+}
+
+/* 优化数字更新时的闪烁 */
+.modern-card-text {
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* 2列布局 - 860px到1289px (860÷430=2, 1289÷430=2.99) */
+@media (min-width: 860px) and (max-width: 1289px) {
+  .modern-grid-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* 3列布局 - 1290px到1719px (1290÷430=3, 1719÷430=3.99) */
+@media (min-width: 1290px) and (max-width: 1719px) {
+  .modern-grid-container {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* 4列布局 - 1720px到2149px (1720÷430=4, 2149÷430=4.99) */
+@media (min-width: 1720px) and (max-width: 2149px) {
+  .modern-grid-container {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* 5列及以上 - 2150px以上 */
+@media (min-width: 2150px) {
+  .modern-grid-container {
+    /* 让浏览器自动计算，保持最小宽度430px */
+    grid-template-columns: repeat(auto-fill, minmax(430px, 1fr)) !important;
+    gap: 1rem !important;
+    padding: 1rem !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* 移动端屏幕 - 小于860px，允许标签换行 */
+@media (max-width: 859px) {
+  .modern-tags-mobile-wrap {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* 单列布局 - 小于860px (859÷430=1.99) */
+@media (max-width: 859px) {
+  .modern-card {
+    /* 强制GPU加速 */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+  }
+  
+  .modern-card-link {
+    /* 预加载优化 */
+    will-change: transform;
+    contain: layout style paint;
+  }
+  
+  /* 减少移动端动画复杂度 */
+  .modern-card-hover {
+    transition: transform 0.1s ease-out;
+  }
+  
+  .modern-card-hover:active {
+    transform: scale(0.98);
+  }
+  
+  /* 禁用hover效果，使用active */
+  .modern-card-hover:hover {
+    transform: none;
+  }
+  
+  /* 优化滚动性能 */
+  .gap-4 {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* 单列布局 - 宽度不足860px时显示单列并填充整个宽度 */
+  .modern-grid-container {
+    grid-template-columns: 1fr !important;
+    /* 减小间距以适应移动端 */
+    gap: 0.75rem !important;
+    padding: 0.75rem !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* 确保卡片在移动端有正确的初始尺寸 */
+  .modern-grid-container > div {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* 预渲染优化 */
+.modern-card-link[data-preload="true"] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
+}
+
+/* 离线节点红色明显指示 */
+.modern-card-offline {
+  border: 3px solid var(--red-9) !important;
+  background: linear-gradient(135deg, var(--red-a2) 0%, var(--red-a3) 50%, var(--red-a2) 100%) !important;
+  box-shadow: 0 0 0 1px var(--red-a5), 0 4px 16px var(--red-a4), 0 0 20px var(--red-a3) !important;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.modern-card-offline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 15px,
+    var(--red-a3) 15px,
+    var(--red-a3) 30px
+  );
+  pointer-events: none;
+  opacity: 0.4;
+  border-radius: var(--card-radius, 0.75rem);
+  z-index: 1;
+}
+
+.modern-card-offline:hover {
+  border-color: var(--red-10) !important;
+  box-shadow: 0 0 0 1px var(--red-a6), 0 6px 20px var(--red-a5), 0 0 30px var(--red-a4) !important;
+}
+
+/* 确保内容在斜纹之上 */
+.modern-card-offline > * {
+  position: relative;
+  z-index: 2;
+}

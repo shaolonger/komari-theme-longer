@@ -1,0 +1,115 @@
+{
+    "name": "Komari Theme Nebula",
+    "short": "Nebula", 
+    "description": "An exquisite cosmic neon theme with interactive 3D dynamic particles and real-time bandwidth wave graphics.",
+    "version": "1.0.0",
+    "author": "Antigravity & longer",
+    "url": "https://github.com/shaolonger/komari-theme-longer",
+    "preview": "preview.png",
+    "configuration": {
+        "type": "managed",
+        "data": [
+            {
+                "name": "主页面配置 (Main Layout)",
+                "type": "title"
+            },
+            {
+                "key": "enableVirtualScroll",
+                "name": "启用虚拟滚动 (Virtual Scroll)",
+                "type": "switch",
+                "default": true,
+                "help": "在服务器列表极多时，推荐启用以大幅提升滚动和页面交互流畅度。"
+            },
+            {
+                "key": "offlineNodePosition",
+                "name": "离线节点位置 (Offline Servers)",
+                "type": "select",
+                "options": "前面,原位置,后面",
+                "default": "后面",
+                "help": "离线服务器节点在列表中的展示位置。"
+            },
+            {
+                "key": "defaultViewMode",
+                "name": "默认视图模式 (Default View)",
+                "type": "select",
+                "options": "Modern,Compact,Classic,Detailed,Task,Earth",
+                "default": "Modern",
+                "help": "默认的服务器展示布局：Modern (赛博卡片)、Compact (极简列表)、Classic (网格)、Detailed (详细表格)、Task (服务任务)、Earth (地球地图)。"
+            },
+            {
+                "key": "enablePagination",
+                "name": "启用分页 (Pagination)",
+                "type": "switch",
+                "default": false,
+                "help": "若服务器极多，开启分页以提高首次加载渲染速度。"
+            },
+            {
+                "key": "paginationPageSize",
+                "name": "每页服务器数",
+                "type": "input",
+                "default": "24",
+                "help": "分页模式下，单页最大展示服务器卡片数。"
+            },
+            {
+                "name": "星云与霓虹定制 (Nebula & Neon)",
+                "type": "title"
+            },
+            {
+                "key": "customAppearance.enabled",
+                "name": "启用星云视觉定制",
+                "type": "switch",
+                "default": true,
+                "help": "开启后，本主题的高级玻璃拟态、粒子特效、动态霓虹边框将会完整生效。"
+            },
+            {
+                "key": "customBackground.nebulaParticles",
+                "name": "启用星云动态粒子背景",
+                "type": "switch",
+                "default": true,
+                "help": "开启后背景展示高性能 3D 浮动粒子星雨。粒子游动速度随服务器整体网络带宽流量变化而动态起伏。"
+            },
+            {
+                "key": "customBackground.imageUrl",
+                "name": "自定义背景壁纸/视频直链",
+                "type": "input",
+                "default": "",
+                "help": "指定自定义背景图片或MP4视频的URL，实现个性化背景定制。"
+            },
+            {
+                "key": "customBackground.fixed",
+                "name": "背景图像固定",
+                "type": "switch",
+                "default": true,
+                "help": "开启后，背景画面将固定，滚动内容时背景不发生位移。"
+            },
+            {
+                "key": "glassmorphism.blurStrength",
+                "name": "毛玻璃模糊强度 (px)",
+                "type": "input",
+                "default": "8",
+                "help": "设置面板背景模糊像素大小，取值0-24，数值越大越模糊。"
+            },
+            {
+                "key": "glassmorphism.lightOpacity",
+                "name": "浅色透明度 (0-100)",
+                "type": "input",
+                "default": "40",
+                "help": "浅色主题下的毛玻璃面板透明比率，值越小背景越通透。"
+            },
+            {
+                "key": "glassmorphism.darkOpacity",
+                "name": "深色透明度 (0-100)",
+                "type": "input",
+                "default": "40",
+                "help": "深色主题下的毛玻璃面板透明比率，值越小背景越通透。"
+            },
+            {
+                "key": "shadow.glowStrength",
+                "name": "霓虹边框发光强度 (px)",
+                "type": "input",
+                "default": "8",
+                "help": "服务器卡片外发光范围强度，发光色会自动适配在线/高负载/离线状态。"
+            }
+        ]
+    }
+}
