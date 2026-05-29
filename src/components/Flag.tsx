@@ -77,8 +77,8 @@ const Flag = React.memo(({ flag, size }: FlagProps) => {
     resolvedFlagFileName = "UN";
   }
 
-  // 构建本地图片路径
-  imgSrc = `/assets/flags/${resolvedFlagFileName}.svg`;
+  // 构建 CDN 图片路径以大幅减小本地包大小并绕过上传文件数量限制
+  imgSrc = `https://cdn.jsdelivr.net/npm/flag-icons/flags/4x3/${resolvedFlagFileName.toLowerCase()}.svg`;
   // 构建 alt 文本和 aria-label
   altText = `地区旗帜: ${resolvedFlagFileName}`;
 
