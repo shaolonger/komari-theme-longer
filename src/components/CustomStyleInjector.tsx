@@ -9,9 +9,7 @@ export const CustomStyleInjector = () => {
   const { publicInfo } = usePublicInfo();
 
   useEffect(() => {
-    if (!publicInfo?.theme_settings) return;
-
-    const settings = publicInfo.theme_settings;
+    const settings = publicInfo?.theme_settings;
 
     // 解析配置值的辅助函数
     const parseNumber = (value: any, defaultValue: number, min: number, max: number): number => {
@@ -28,19 +26,23 @@ export const CustomStyleInjector = () => {
       return false;
     };
 
-    // 提取配置值
-    const customEnabled = parseBool(settings['customAppearance.enabled']);
-    const bgUrl = settings['customBackground.imageUrl'] || '';
-    const bgFixed = parseBool(settings['customBackground.fixed']);
+    // 提取配置值，如果未定义或为空（刚上传未保存）则使用星云主题的高级默认值
+    const customEnabled = settings && settings['customAppearance.enabled'] !== undefined
+      ? parseBool(settings['customAppearance.enabled'])
+      : true;
+    const bgUrl = settings ? (settings['customBackground.imageUrl'] || '') : '';
+    const bgFixed = settings && settings['customBackground.fixed'] !== undefined
+      ? parseBool(settings['customBackground.fixed'])
+      : true;
 
-    const blurStrength = parseNumber(settings['glassmorphism.blurStrength'], 5, 0, 20);
-    const lightOpacity = parseNumber(settings['glassmorphism.lightOpacity'], 30, 0, 100);
-    const darkOpacity = parseNumber(settings['glassmorphism.darkOpacity'], 30, 0, 100);
+    const blurStrength = settings ? parseNumber(settings['glassmorphism.blurStrength'], 8, 0, 20) : 8;
+    const lightOpacity = settings ? parseNumber(settings['glassmorphism.lightOpacity'], 40, 0, 100) : 40;
+    const darkOpacity = settings ? parseNumber(settings['glassmorphism.darkOpacity'], 40, 0, 100) : 40;
 
-    const layoutOpacity = parseNumber(settings['layout.opacity'], 95, 80, 100) / 100;
-    const borderRadius = parseNumber(settings['layout.borderRadius'], 8, 0, 16);
+    const layoutOpacity = (settings ? parseNumber(settings['layout.opacity'], 95, 80, 100) : 95) / 100;
+    const borderRadius = settings ? parseNumber(settings['layout.borderRadius'], 12, 0, 16) : 12;
 
-    const glowStrength = parseNumber(settings['shadow.glowStrength'], 10, 0, 20);
+    const glowStrength = settings ? parseNumber(settings['shadow.glowStrength'], 8, 0, 20) : 8;
 
     // 生成CSS内容
     let cssContent = `
