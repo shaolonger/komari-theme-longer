@@ -73,4 +73,4 @@ vite.config.dev.ts
 komari-web/
 
 # Local build artifacts
-komari-theme-v*.zip
+komari-theme-*.zip

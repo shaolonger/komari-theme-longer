@@ -44,11 +44,27 @@ If you choose to build from source, please ensure you have some basic computer k
     git clone [https://github.com/svnmoe/komari-web-mochi.git](https://github.com/svnmoe/komari-web-mochi.git)
     cd ./komari-web-mochi
     ```
-2.  Run the build script:
+2.  Install Node.js 20+, then run the official package command:
+    ```bash
+    npm run package:theme
+    ```
+    This command now selects the correct packager for your platform automatically:
+    - Windows: `build-theme.ps1`
+    - Linux / macOS: `build-theme.sh`
+
+    If you want to call the platform-specific script directly, you can also run:
     ```bash
     bash build-theme.sh
     ```
+    ```powershell
+    .\build-theme.ps1
+    ```
 3.  Find the compiled ZIP file, then log in to your Komari dashboard, go to **Settings -> Theme Management**, and upload and enable the theme.
+
+> [!IMPORTANT]
+> Do not manually compress `dist`, `komari-theme.json`, and `preview.png` with Windows Explorer or arbitrary ZIP tools.
+> A valid Komari theme package must keep standard archive paths such as `dist/index.html` and `dist/assets/...`.
+> Always generate release ZIPs with `npm run package:theme`, `build-theme.ps1`, or `build-theme.sh`.
 
 ## Contributing
 

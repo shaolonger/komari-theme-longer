@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "package:theme": "node scripts/package-theme.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

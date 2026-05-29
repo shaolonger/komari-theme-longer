@@ -56,6 +56,12 @@ check_dependencies() {
 # Install dependencies
 install_dependencies() {
     print_status "Installing dependencies..."
+
+    if [ -d "node_modules" ]; then
+        print_success "node_modules already present, skipping npm install"
+        return
+    fi
+
     npm install
     print_success "Dependencies installed"
 }
@@ -178,6 +184,7 @@ main() {
     print_success "Theme package build completed! 🎉"
     echo
     echo "You can now use the generated zip file as a theme package."
+    echo "For a cross-platform entrypoint, you can also run: npm run package:theme"
 }
 
 # Run main function

@@ -42,11 +42,27 @@
     git clone [https://github.com/svnmoe/komari-web-mochi.git](https://github.com/svnmoe/komari-web-mochi.git)
     cd ./komari-web-mochi
     ```
-2.  执行编译脚本：
+2.  先安装 Node.js 20+，然后执行官方打包命令：
+    ```bash
+    npm run package:theme
+    ```
+    这个命令现在会根据平台自动选择正确的打包方式：
+    - Windows：自动调用 `build-theme.ps1`
+    - Linux / macOS：自动调用 `build-theme.sh`
+
+    如果您想直接执行平台对应脚本，也可以使用：
     ```bash
     bash build-theme.sh
     ```
+    ```powershell
+    .\build-theme.ps1
+    ```
 3.  自行找到编译出来的 ZIP 文件，然后登录您的 Komari 后台，选择 **设置 -> 主题管理**，上传并启用主题。
+
+> [!IMPORTANT]
+> 不要再用 Windows 资源管理器或其他手工方式直接把 `dist`、`komari-theme.json`、`preview.png` 压成 ZIP。
+> Komari 主题包必须保留标准的 ZIP 内部路径，例如 `dist/index.html`、`dist/assets/...`。
+> 请始终使用仓库自带的 `npm run package:theme`、`build-theme.ps1` 或 `build-theme.sh` 来产出主题包。
 
 ## 更新主题
 
