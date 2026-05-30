@@ -174,6 +174,15 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData, forceShowTra
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [searchTerm]);
 
+  useEffect(() => {
+    const focusSearch = () => {
+      searchRef.current?.focus();
+    };
+
+    window.addEventListener("nebula:focus-node-search", focusSearch);
+    return () => window.removeEventListener("nebula:focus-node-search", focusSearch);
+  }, []);
+
   // 过滤节点
   const filteredNodes = useMemo(() => {
     let result = nodes;

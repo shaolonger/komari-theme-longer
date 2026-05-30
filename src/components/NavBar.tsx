@@ -2,66 +2,138 @@ import ThemeSwitch from "./ThemeSwitch";
 import ColorSwitch from "./ColorSwitch";
 import LanguageSwitch from "./Language";
 import LoginDialog from "./Login";
-import FloatingMenu from "./FloatingMenu";
-import { IconButton } from "@radix-ui/themes";
-import { GitHubLogoIcon } from "@radix-ui/react-icons";
-import { Link } from "react-router-dom";
+import { Button, DropdownMenu, IconButton } from "@radix-ui/themes";
+import { Link, useLocation } from "react-router-dom";
 import { usePublicInfo } from "@/contexts/PublicInfoContext";
 import { useTranslation } from "react-i18next";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Bell, Menu, RefreshCcw, Search, Wifi } from "lucide-react";
+import { useLiveData } from "@/contexts/LiveDataContext";
+
 const NavBar = () => {
   const { publicInfo } = usePublicInfo();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isMobile = useIsMobile();
+  const { live_data } = useLiveData();
+  const location = useLocation();
+  const isZh = i18n.resolvedLanguage?.toLowerCase().startsWith("zh");
+  const copy = (zh: string, en: string) => (isZh ? zh : en);
+  const isConnected = Boolean(live_data?.data);
+
+  if (location.pathname.startsWith("/instance/")) {
+    return null;
+  }
+
+  const focusNodeSearch = () => {
+    window.dispatchEvent(new CustomEvent("nebula:focus-node-search"));
+  };
   
   return (
     <>
-      <nav className="nav-bar flex rounded-b-lg items-center gap-3 max-h-16 justify-end min-w-full p-2 px-4">
-        <div className="mr-auto flex">
-          {/* <img src="/assets/logo.png" alt="Komari Logo" className="w-10 object-cover mr-2 self-center"/> */}
-          <Link to="/">
-            <label className="text-3xl font-bold ">{publicInfo?.sitename}</label>
+      <nav className="nebula-topbar">
+        <div className="nebula-mobile-brand xl:hidden">
+          <Link to="/" className="nebula-mobile-brand-link">
+            <span className="nebula-mobile-brand-title">
+              {publicInfo?.sitename || "Komari Monitor"}
+            </span>
+            <span className="nebula-mobile-brand-subtitle">Nebula</span>
           </Link>
-          <div className="hidden flex-row items-end md:flex">
-            <div
-              style={{ color: "var(--accent-3)" }}
-              className="border-solid border-r-2 mr-1 mb-1 w-2 h-2/3"
-            />
-            <label
-              className="text-base font-bold"
-              style={{ color: "var(--accent-4)" }}
-            >
-              Komari Monitor
-            </label>
-          </div>
         </div>
 
-        {/* Desktop buttons - hide on mobile */}
-        {!isMobile && (
-          <>
-            <IconButton
-              variant="soft"
-              onClick={() => {
-                window.open("https://github.com/komari-monitor", "_blank");
-              }}
-            >
-              <GitHubLogoIcon />
-            </IconButton>
+        <button type="button" className="nebula-search-trigger" onClick={focusNodeSearch}>
+          <Search size={18} />
+          <span className="nebula-search-trigger-text">
+            {copy("搜索节点、服务器、地区...", "Search nodes, servers, regions...")}
+          </span>
+          {!isMobile && <span className="nebula-search-shortcut">⌘ K</span>}
+        </button>
 
-            <ThemeSwitch />
-            <ColorSwitch />
-            <LanguageSwitch />
-            {publicInfo?.private_site ? (<LoginDialog
-              autoOpen={publicInfo?.private_site}
-              info={t('common.private_site')}
-              onLoginSuccess={() => { window.location.reload(); }}
-            />) : (<LoginDialog />)}
-          </>
-        )}
+        <div className="nebula-topbar-actions">
+          <div className={`nebula-topbar-chip ${isConnected ? "is-success" : "is-muted"}`}>
+            <Wifi size={16} />
+            <div>
+              <div className="nebula-topbar-chip-title">
+                {copy("实时连接", "Live Connection")}
+              </div>
+              <div className="nebula-topbar-chip-subtitle">
+                {isConnected ? copy("已连接", "Connected") : copy("等待连接", "Waiting")}
+              </div>
+            </div>
+          </div>
+
+          {!isMobile && (
+            <div className="nebula-topbar-chip">
+              <RefreshCcw size={16} />
+              <div>
+                <div className="nebula-topbar-chip-title">{copy("自动刷新", "Auto-refresh")}</div>
+                <div className="nebula-topbar-chip-subtitle">15s</div>
+              </div>
+            </div>
+          )}
+
+          {!isMobile && <ThemeSwitch />}
+          {!isMobile && <ColorSwitch />}
+          {!isMobile && <LanguageSwitch />}
+
+          {!isMobile && (
+            <IconButton variant="soft" className="nebula-icon-button">
+              <Bell size={18} />
+            </IconButton>
+          )}
+
+          {!isMobile && (
+            <Button variant="soft" className="nebula-environment-chip">
+              {copy("生产环境", "Production")}
+            </Button>
+          )}
+
+          {!isMobile &&
+            (publicInfo?.private_site ? (
+              <LoginDialog
+                autoOpen={publicInfo?.private_site}
+                info={t("common.private_site")}
+                onLoginSuccess={() => {
+                  window.location.reload();
+                }}
+              />
+            ) : (
+              <LoginDialog />
+            ))}
+
+          {isMobile && (
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger>
+                <IconButton variant="soft" className="nebula-icon-button">
+                  <Menu size={20} />
+                </IconButton>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content align="end" className="min-w-[220px]">
+                <DropdownMenu.Label>{copy("界面控制", "Interface Controls")}</DropdownMenu.Label>
+                <DropdownMenu.Separator />
+                <div className="flex items-center gap-2 px-2 py-1.5">
+                  <ThemeSwitch />
+                  <ColorSwitch />
+                  <LanguageSwitch />
+                </div>
+                <DropdownMenu.Separator />
+                <div className="px-2 py-1.5">
+                  {publicInfo?.private_site ? (
+                    <LoginDialog
+                      autoOpen={publicInfo?.private_site}
+                      info={t("common.private_site")}
+                      onLoginSuccess={() => {
+                        window.location.reload();
+                      }}
+                    />
+                  ) : (
+                    <LoginDialog trigger={copy("登录 / 后台", "Login / Manage")} />
+                  )}
+                </div>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
+          )}
+        </div>
       </nav>
-      
-      {/* Floating menu for mobile */}
-      <FloatingMenu />
     </>
   );
 };

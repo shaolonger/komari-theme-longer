@@ -39,12 +39,14 @@ const i18n = i18next
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: "en-US",
+    fallbackLng: "zh-CN",
     interpolation: {
       escapeValue: false, // React handles XSS
     },
     detection: {
-      order: ["querystring", "cookie", "localStorage", "navigator", "htmlTag"],
+      // Default to Simplified Chinese on first visit, while still honoring
+      // explicit query/cached user choices afterwards.
+      order: ["querystring", "cookie", "localStorage"],
       caches: ["localStorage", "cookie"],
     },
   });
