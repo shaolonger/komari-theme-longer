@@ -23,6 +23,18 @@ const buildSparkBars = (seed: number) =>
     return 16 + (raw % 26);
   });
 
+const buildPingBars = (values: number[]) => {
+  if (values.length === 0) {
+    return Array.from({ length: 24 }, (_, index) => 18 + ((index * 7) % 12));
+  }
+  const safeMax = Math.max(...values, 1);
+  return Array.from({ length: 24 }, (_, index) => {
+    const sample = values[index % values.length] ?? 0;
+    const normalized = Math.max(0, Math.min(1, sample / safeMax));
+    return 12 + normalized * 34;
+  });
+};
+
 const getDaysUntil = (expiredAt?: string) => {
   if (!expiredAt) return null;
   const time = new Date(expiredAt).getTime();
@@ -109,6 +121,19 @@ export const MobileDetailsCard: React.FC<MobileDetailsCardProps> = ({
     .filter(Boolean)
     .slice(0, 4);
   const [activePanel, setActivePanel] = useState<"snapshot" | "asset" | "latency">("snapshot");
+  const latencyValues = pingSummary.items
+    .map((item) => (item.current == null ? null : Number(item.current)))
+    .filter((value): value is number => value != null && Number.isFinite(value));
+  const avgLatency = latencyValues.length > 0 ? latencyValues.reduce((acc, value) => acc + value, 0) / latencyValues.length : null;
+  const maxLatency = latencyValues.length > 0 ? Math.max(...latencyValues) : null;
+  const pingBars = buildPingBars(latencyValues);
+  const warningSignals = [
+    cpuUsage >= 85 ? copy("CPU 压力持续偏高", "CPU pressure remains high") : null,
+    memoryUsagePercent >= 85 ? copy("内存接近上限", "Memory is close to saturation") : null,
+    diskUsagePercent >= 90 ? copy("磁盘接近满载", "Disk usage is nearing full") : null,
+    maxLatency != null && maxLatency >= 120 ? copy("检测到延迟尖峰", "Latency spikes detected") : null,
+    expiryDays != null && expiryDays <= 7 ? copy("实例临近到期", "Instance is close to expiry") : null,
+  ].filter(Boolean) as string[];
 
   return (
     <div className="node-detail-body">
@@ -206,11 +231,23 @@ export const MobileDetailsCard: React.FC<MobileDetailsCardProps> = ({
             <div className="node-detail-summary-header">
               <div className="node-detail-section-title">{copy("资产详情", "Asset Details")}</div>
             </div>
-            <div className="node-detail-summary-items mobile">
-              <DetailRow label={copy("价格", "Price")} value={priceLabel} closeLabel={copy("关闭", "Close")} />
-              <DetailRow label={copy("到期", "Expiration")} value={expiryLabel} closeLabel={copy("关闭", "Close")} />
-              <DetailRow label={copy("分组", "Group")} value={node.group || copy("未分组", "Ungrouped")} closeLabel={copy("关闭", "Close")} />
-              <DetailRow label={copy("累计流量", "Total Traffic")} value={formatBytes(networkTotal)} closeLabel={copy("关闭", "Close")} />
+            <div className="node-detail-mobile-asset-grid">
+              <div className="node-detail-mobile-asset-item">
+                <span>{copy("计费", "Billing")}</span>
+                <strong>{priceLabel}</strong>
+              </div>
+              <div className="node-detail-mobile-asset-item">
+                <span>{copy("到期", "Expiration")}</span>
+                <strong>{expiryLabel}</strong>
+              </div>
+              <div className="node-detail-mobile-asset-item">
+                <span>{copy("分组", "Group")}</span>
+                <strong>{node.group || copy("未分组", "Ungrouped")}</strong>
+              </div>
+              <div className="node-detail-mobile-asset-item">
+                <span>{copy("流量总计", "Traffic Total")}</span>
+                <strong>{formatBytes(networkTotal)}</strong>
+              </div>
             </div>
 
             {hasTrafficLimit ? (
@@ -264,6 +301,32 @@ export const MobileDetailsCard: React.FC<MobileDetailsCardProps> = ({
           </div>
         )}
       </div>
+
+      <div className="node-detail-mobile-ping-card node-detail-animate" style={{ ["--delay" as any]: "220ms" }}>
+        <div className="node-detail-mobile-ping-head">
+          <span>{copy("Ping (24h)", "Ping (24h)")}</span>
+          <strong>{avgLatency == null ? "-" : `${Math.round(avgLatency)} ms`}</strong>
+        </div>
+        <div className="node-detail-mobile-ping-bars" aria-hidden="true">
+          {pingBars.map((height, index) => (
+            <span key={`ping-${index}`} style={{ height }} />
+          ))}
+        </div>
+        <div className="node-detail-mobile-ping-meta">
+          <span>{copy("峰值", "Peak")} {maxLatency == null ? "-" : `${Math.round(maxLatency)} ms`}</span>
+          <span>{copy("区域点位", "Probes")} {pingSummary.items.length}</span>
+        </div>
+      </div>
+
+      {warningSignals.length > 0 && (
+        <div className="node-detail-mobile-risk-banner node-detail-animate" style={{ ["--delay" as any]: "240ms" }}>
+          <div className="node-detail-mobile-risk-icon">!</div>
+          <div className="node-detail-mobile-risk-copy">
+            <strong>{copy("延迟与负载提醒", "Latency and Load Alert")}</strong>
+            <span>{warningSignals[0]}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

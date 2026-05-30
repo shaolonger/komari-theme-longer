@@ -568,6 +568,37 @@
   gap: 12px;
 }
 
+.node-detail-mobile-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.node-detail-mobile-asset-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 64px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.node-detail-mobile-asset-item span {
+  font-size: 11px;
+  color: rgba(168, 181, 210, 0.74);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.node-detail-mobile-asset-item strong {
+  font-size: 0.94rem;
+  color: rgba(244, 247, 255, 0.98);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .node-detail-mobile-panel-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -856,6 +887,97 @@
 }
 
 .node-detail-mobile-alert-copy span {
+  font-size: 0.78rem;
+  color: rgba(253, 225, 178, 0.9);
+  line-height: 1.35;
+}
+
+.node-detail-mobile-ping-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: linear-gradient(180deg, rgba(13, 21, 38, 0.95), rgba(8, 14, 27, 0.91));
+  box-shadow: 0 14px 30px rgba(3, 8, 18, 0.26);
+}
+
+.node-detail-mobile-ping-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.node-detail-mobile-ping-head span {
+  font-size: 0.84rem;
+  color: rgba(189, 202, 233, 0.82);
+}
+
+.node-detail-mobile-ping-head strong {
+  font-size: 1rem;
+  color: rgba(122, 247, 160, 0.96);
+}
+
+.node-detail-mobile-ping-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 46px;
+}
+
+.node-detail-mobile-ping-bars span {
+  flex: 1;
+  border-radius: 999px 999px 0 0;
+  background: linear-gradient(180deg, rgba(76, 255, 146, 0.95), rgba(53, 195, 255, 0.15));
+}
+
+.node-detail-mobile-ping-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.76rem;
+  color: rgba(168, 180, 209, 0.78);
+}
+
+.node-detail-mobile-risk-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 15px;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: linear-gradient(180deg, rgba(78, 44, 9, 0.84), rgba(52, 28, 7, 0.8));
+}
+
+.node-detail-mobile-risk-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 700;
+  color: rgba(255, 223, 172, 0.96);
+  background: rgba(255, 187, 95, 0.15);
+  border: 1px solid rgba(255, 187, 95, 0.3);
+}
+
+.node-detail-mobile-risk-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.node-detail-mobile-risk-copy strong {
+  font-size: 0.84rem;
+  color: rgba(255, 230, 190, 0.98);
+}
+
+.node-detail-mobile-risk-copy span {
   font-size: 0.78rem;
   color: rgba(253, 225, 178, 0.9);
   line-height: 1.35;
@@ -1206,6 +1328,10 @@
 }
 
 @media (max-width: 960px) {
+  .node-detail-mobile-asset-grid {
+    grid-template-columns: 1fr;
+  }
+
   .node-detail-breadcrumb {
     flex-direction: column-reverse;
     align-items: flex-start;
