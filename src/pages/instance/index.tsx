@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useLiveData } from "../../contexts/LiveDataContext";
 import { useTranslation } from "react-i18next";
 import type { Record } from "../../types/LiveData";
@@ -15,17 +15,21 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DesktopDetailsCard } from "@/components/DesktopDetailsCard";
 import { getOSImage } from "@/utils";
 import { formatUptime } from "@/components/Node";
+import { ArrowLeft, ChevronRight, Copy, GitCompareArrows, Share2, Shield } from "lucide-react";
 import "./instance-detail.css";
 
 export default function InstancePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { onRefresh, live_data } = useLiveData();
   const { uuid } = useParams<{ uuid: string }>();
+  const navigate = useNavigate();
   const [recent, setRecent] = useState<Record[]>([]);
   const { nodeList } = useNodeList();
   const length = 60 * 5;
   const [chartView, setChartView] = useState<"load" | "ping">("load");
   const isMobile = useIsMobile();
+  const isZh = i18n.resolvedLanguage?.toLowerCase().startsWith("zh");
+  const copy = (zh: string, en: string) => (isZh ? zh : en);
   // #region 初始数据加载
   const node = nodeList?.find((n) => n.uuid === uuid);
   const isOnline = live_data?.data?.online?.includes(uuid || "") || false;
@@ -37,6 +41,61 @@ export default function InstancePage() {
   const updatedLabel = liveNodeData?.updated_at ? new Date(liveNodeData.updated_at).toLocaleString() : "-";
   const versionLabel = node?.version || "-";
   const statusText = isOnline ? t("nodeCard.online") : t("nodeCard.offline");
+
+  const handleCopy = async (value: string) => {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch (error) {
+      console.error("Copy failed:", error);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: nodeName,
+          text: nodeName,
+          url: shareUrl,
+        });
+        return;
+      }
+      await navigator.clipboard.writeText(shareUrl);
+    } catch (error) {
+      console.error("Share failed:", error);
+    }
+  };
+
+  const detailActions = [
+    {
+      key: "copy",
+      label: copy("复制 ID", "Copy ID"),
+      icon: <Copy size={16} />,
+      onClick: () => handleCopy(nodeUuid),
+    },
+    {
+      key: "compare",
+      label: copy("对比", "Compare"),
+      icon: <GitCompareArrows size={16} />,
+      onClick: () => {},
+      disabled: true,
+    },
+    {
+      key: "share",
+      label: copy("分享", "Share"),
+      icon: <Share2 size={16} />,
+      onClick: handleShare,
+    },
+    {
+      key: "admin",
+      label: copy("后台", "Admin"),
+      icon: <Shield size={16} />,
+      onClick: () => navigate("/manage"),
+      emphasis: true,
+    },
+  ];
 
   useEffect(() => {
     fetch(`/api/recent/${uuid}`)
@@ -76,6 +135,18 @@ export default function InstancePage() {
     return (
       <div className="node-detail-shell">
         <div className="node-detail-container">
+          <div className="node-detail-breadcrumb node-detail-animate" style={{ ["--delay" as any]: "0ms" }}>
+            <button type="button" className="node-detail-back-link" onClick={() => navigate(-1)}>
+              <ArrowLeft size={16} />
+              <span>{copy("返回", "Back")}</span>
+            </button>
+            <div className="node-detail-breadcrumb-trail">
+              <span>{copy("节点详情", "Instance")}</span>
+              <ChevronRight size={14} />
+              <span>{nodeName}</span>
+            </div>
+          </div>
+
           <div className="node-detail-hero node-detail-animate" style={{ ["--delay" as any]: "0ms" }}>
             <div className="node-detail-hero-top">
               <div className="node-detail-title">
@@ -106,6 +177,21 @@ export default function InstancePage() {
                 <span className="node-detail-hero-value">{updatedLabel}</span>
               </div>
             </div>
+          </div>
+
+          <div className="node-detail-actions node-detail-actions-mobile node-detail-animate" style={{ ["--delay" as any]: "120ms" }}>
+            {detailActions.map((action) => (
+              <button
+                key={action.key}
+                type="button"
+                className={`node-detail-action-button ${action.emphasis ? "is-emphasis" : ""}`}
+                onClick={action.onClick}
+                disabled={action.disabled}
+              >
+                {action.icon}
+                <span>{action.label}</span>
+              </button>
+            ))}
           </div>
 
           <MobileDetailsCard node={node} liveData={liveNodeData} />
@@ -148,6 +234,20 @@ export default function InstancePage() {
   return (
     <div className="node-detail-shell">
       <div className="node-detail-container">
+        <div className="node-detail-breadcrumb node-detail-animate" style={{ ["--delay" as any]: "0ms" }}>
+          <div className="node-detail-breadcrumb-trail">
+            <span>{copy("节点实例", "Instances")}</span>
+            <ChevronRight size={14} />
+            <span>{node?.region || copy("节点详情", "Instance")}</span>
+            <ChevronRight size={14} />
+            <span>{nodeName}</span>
+          </div>
+          <button type="button" className="node-detail-back-link" onClick={() => navigate(-1)}>
+            <ArrowLeft size={16} />
+            <span>{copy("返回", "Back")}</span>
+          </button>
+        </div>
+
         <div className="node-detail-hero node-detail-animate" style={{ ["--delay" as any]: "0ms" }}>
           <div className="node-detail-hero-top">
             <div className="node-detail-title">
@@ -178,6 +278,21 @@ export default function InstancePage() {
               <span className="node-detail-hero-value">{updatedLabel}</span>
             </div>
           </div>
+        </div>
+
+        <div className="node-detail-actions node-detail-animate" style={{ ["--delay" as any]: "120ms" }}>
+          {detailActions.map((action) => (
+            <button
+              key={action.key}
+              type="button"
+              className={`node-detail-action-button ${action.emphasis ? "is-emphasis" : ""}`}
+              onClick={action.onClick}
+              disabled={action.disabled}
+            >
+              {action.icon}
+              <span>{action.label}</span>
+            </button>
+          ))}
         </div>
 
         {node && <DesktopDetailsCard node={node} liveData={liveNodeData} />}
