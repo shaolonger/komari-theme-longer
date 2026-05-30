@@ -469,6 +469,38 @@ const Index = () => {
         : null,
     ].filter(Boolean) as InsightRow[];
 
+    const latestEvents = enrichedNodes
+      .map((entry) => {
+        const isOffline = !entry.online;
+        const isWarning = entry.cpu >= 80 || entry.mem >= 85 || entry.disk >= 90;
+        const daysLeft = entry.daysLeft;
+        const expiresSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 10;
+
+        const tone: InsightRow["tone"] = isOffline ? "danger" : isWarning ? "warning" : expiresSoon ? "info" : "success";
+        const value = isOffline
+          ? copy("离线", "Offline")
+          : isWarning
+            ? copy("高负载", "Hot")
+            : expiresSoon
+              ? copy("将到期", "Expiring")
+              : copy("稳定", "Stable");
+
+        return {
+          name: entry.node.name,
+          sublabel: entry.node.region,
+          value,
+          tone,
+          score: isOffline ? 4 : isWarning ? 3 : expiresSoon ? 2 : 1,
+          traffic: entry.traffic,
+        };
+      })
+      .sort((left, right) => {
+        if (left.score !== right.score) return right.score - left.score;
+        return right.traffic - left.traffic;
+      })
+      .slice(0, 6)
+      .map(({ score, traffic, ...item }) => item as InsightRow);
+
     const spotlightNodes = enrichedNodes
       .map((entry) => {
         const status: SpotlightNode["status"] = !entry.online
@@ -534,6 +566,7 @@ const Index = () => {
       expiringSoon,
       regionHealth,
       latestSignals,
+      latestEvents,
       spotlightNodes,
     };
   }, [copy, liveMap, liveData.online, nodeList, onlineSet]);
@@ -1027,6 +1060,16 @@ const Index = () => {
               },
             ]}
           />
+        </section>
+
+        <section className="nebula-surface nebula-analytics-card" id="nebula-home-events">
+          <div className="nebula-panel-header">
+            <div>
+              <div className="nebula-section-kicker">{copy("事件时间线", "Event Timeline")}</div>
+              <h3 className="nebula-section-title">{copy("近期节点事件摘要", "Recent node event digest")}</h3>
+            </div>
+          </div>
+          <InsightSection title={copy("最近事件", "Recent Events")} rows={dashboard.latestEvents} />
         </section>
       </div>
     </section>
