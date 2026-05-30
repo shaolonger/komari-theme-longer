@@ -360,6 +360,38 @@ export default function InstancePage() {
           ))}
         </div>
 
+        <section className="node-detail-desktop-brief node-detail-animate" style={{ ["--delay" as any]: "180ms" }}>
+          <div className="node-detail-desktop-brief-main">
+            <div className="node-detail-desktop-brief-headline">
+              <span>{copy("实例工作负载概览", "Instance Workload Overview")}</span>
+              <strong>{nodeName}</strong>
+            </div>
+            <div className="node-detail-desktop-brief-tags">
+              {mobileTelemetryTags.map((item) => (
+                <span key={`desktop-${item.label}`} className="node-detail-desktop-brief-tag">
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                </span>
+              ))}
+            </div>
+          </div>
+          {mobileSignals.length > 0 && (
+            <div className="node-detail-desktop-alerts">
+              <div className="node-detail-desktop-alert-title">
+                <TriangleAlert size={15} />
+                <span>{copy("风险提醒", "Risk Alerts")}</span>
+              </div>
+              <div className="node-detail-desktop-alert-list">
+                {mobileSignals.slice(0, 2).map((signal, index) => (
+                  <div key={`${signal}-${index}`} className="node-detail-desktop-alert-item">
+                    {signal}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
         {node && <DesktopDetailsCard node={node} liveData={liveNodeData} />}
 
         <div className="node-detail-chart-card node-detail-animate" style={{ ["--delay" as any]: "320ms" }}>

@@ -613,6 +613,87 @@
   gap: 12px;
 }
 
+.node-detail-desktop-brief {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 14px;
+}
+
+.node-detail-desktop-brief-main,
+.node-detail-desktop-alerts {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(165deg, rgba(11, 19, 37, 0.88), rgba(9, 15, 28, 0.92));
+  border-radius: 20px;
+  padding: 16px 18px;
+}
+
+.node-detail-desktop-brief-headline span {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(167, 180, 210, 0.72);
+}
+
+.node-detail-desktop-brief-headline strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 21px;
+  color: rgba(245, 248, 255, 0.96);
+}
+
+.node-detail-desktop-brief-tags {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.node-detail-desktop-brief-tag {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.node-detail-desktop-brief-tag span {
+  font-size: 11px;
+  color: rgba(168, 180, 209, 0.72);
+}
+
+.node-detail-desktop-brief-tag strong {
+  font-size: 16px;
+  color: rgba(245, 248, 255, 0.96);
+}
+
+.node-detail-desktop-alert-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 214, 134, 0.9);
+}
+
+.node-detail-desktop-alert-list {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.node-detail-desktop-alert-item {
+  border-radius: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  background: rgba(79, 48, 12, 0.24);
+  color: rgba(255, 223, 166, 0.95);
+  padding: 9px 11px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
 .node-detail-action-button {
   display: inline-flex;
   align-items: center;
@@ -1095,6 +1176,14 @@
     padding: 0 16px;
   }
 
+  .node-detail-desktop-brief {
+    grid-template-columns: 1fr;
+  }
+
+  .node-detail-desktop-brief-tags {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .node-detail-resource-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1238,6 +1327,10 @@
 }
 
 @media (max-width: 560px) {
+  .node-detail-desktop-brief-tags {
+    grid-template-columns: 1fr;
+  }
+
   .node-detail-resource-grid,
   .node-detail-mobile-resource-grid {
     grid-template-columns: 1fr 1fr;
