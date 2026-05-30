@@ -530,10 +530,21 @@ body {
 }
 
 .nebula-command-header {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
   gap: 1rem;
   padding: 1.1rem;
+  overflow: hidden;
+}
+
+.nebula-command-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(120deg, rgba(255, 255, 255, 0.12), transparent 35%);
+  opacity: 0.3;
 }
 
 .nebula-command-headline h1 {
@@ -566,8 +577,9 @@ body {
   min-height: 5.4rem;
   border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(255, 255, 255, 0.03);
+  background: linear-gradient(180deg, rgba(18, 30, 54, 0.84), rgba(10, 17, 32, 0.86));
   padding: 0.85rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .nebula-command-pill span {
@@ -577,6 +589,7 @@ body {
 
 .nebula-command-pill strong {
   font-size: 0.96rem;
+  letter-spacing: -0.01em;
   color: rgba(245, 247, 255, 0.98);
 }
 
@@ -591,6 +604,7 @@ body {
 }
 
 .nebula-spotlight-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -599,6 +613,19 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.07);
   background: linear-gradient(180deg, rgba(13, 22, 40, 0.95), rgba(8, 14, 27, 0.92));
   padding: 0.9rem;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.nebula-spotlight-card::after {
+  content: "";
+  position: absolute;
+  left: 0.9rem;
+  right: 0.9rem;
+  bottom: 0.75rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(92, 115, 255, 0.82), rgba(54, 169, 255, 0.2));
+  opacity: 0.85;
 }
 
 .nebula-spotlight-card.is-online {
@@ -1053,6 +1080,7 @@ body {
 }
 
 .nebula-mobile-node-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.95rem;
@@ -1063,6 +1091,11 @@ body {
     linear-gradient(180deg, rgba(12, 20, 37, 0.94), rgba(8, 14, 27, 0.9)),
     radial-gradient(circle at top left, rgba(88, 97, 255, 0.12), transparent 26%);
   box-shadow: 0 22px 48px rgba(1, 7, 17, 0.34);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.nebula-mobile-node-card:active {
+  transform: scale(0.995);
 }
 
 .nebula-mobile-node-card.is-online {
@@ -1262,6 +1295,27 @@ body {
   background: linear-gradient(180deg, rgba(93, 108, 255, 0.98), rgba(76, 139, 255, 0.92));
   color: white;
   box-shadow: 0 24px 44px rgba(67, 98, 255, 0.34);
+  animation: nebulaFabPulse 4s ease-in-out infinite;
+}
+
+@keyframes nebulaFabPulse {
+  0%,
+  100% {
+    box-shadow: 0 24px 44px rgba(67, 98, 255, 0.34);
+  }
+  50% {
+    box-shadow: 0 24px 44px rgba(67, 98, 255, 0.34), 0 0 0 8px rgba(95, 118, 255, 0.08);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nebula-spotlight-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .nebula-mobile-node-card:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .nebula-mobile-bottom-nav {
