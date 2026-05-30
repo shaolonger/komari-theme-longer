@@ -15,7 +15,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { DesktopDetailsCard } from "@/components/DesktopDetailsCard";
 import { getOSImage } from "@/utils";
 import { formatUptime } from "@/components/Node";
-import { ArrowLeft, ChevronRight, Copy, GitCompareArrows, Share2, Shield } from "lucide-react";
+import { ArrowLeft, ChevronRight, Copy, GitCompareArrows, Share2, Shield, TriangleAlert, Zap } from "lucide-react";
 import "./instance-detail.css";
 
 export default function InstancePage() {
@@ -41,6 +41,35 @@ export default function InstancePage() {
   const updatedLabel = liveNodeData?.updated_at ? new Date(liveNodeData.updated_at).toLocaleString() : "-";
   const versionLabel = node?.version || "-";
   const statusText = isOnline ? t("nodeCard.online") : t("nodeCard.offline");
+  const cpuUsage = liveNodeData?.cpu?.usage || 0;
+  const memUsage = node?.mem_total && liveNodeData ? (liveNodeData.ram.used / node.mem_total) * 100 : 0;
+  const diskUsage = node?.disk_total && liveNodeData ? (liveNodeData.disk.used / node.disk_total) * 100 : 0;
+  const processCount = liveNodeData?.process || 0;
+
+  const getDaysUntil = (expiredAt?: string) => {
+    if (!expiredAt) return null;
+    const time = new Date(expiredAt).getTime();
+    if (Number.isNaN(time)) return null;
+    return Math.ceil((time - Date.now()) / (1000 * 60 * 60 * 24));
+  };
+  const expiryDays = getDaysUntil(node?.expired_at);
+
+  const mobileSignals = [
+    !isOnline ? copy("节点离线，实时数据中断", "Node offline, realtime telemetry interrupted") : null,
+    cpuUsage >= 85 ? copy("CPU 长时间高负载，建议立即巡检", "CPU sustained at high load, immediate inspection recommended") : null,
+    memUsage >= 85 ? copy("内存占用过高，存在触顶风险", "Memory usage is high and close to saturation") : null,
+    diskUsage >= 90 ? copy("磁盘空间接近上限", "Disk usage is nearing capacity") : null,
+    expiryDays !== null && expiryDays <= 7 ? copy("节点临近到期，请安排续费", "Node is close to expiration, schedule renewal") : null,
+  ].filter(Boolean) as string[];
+
+  const mobileTelemetryTags = [
+    { label: copy("CPU", "CPU"), value: `${Math.round(cpuUsage)}%` },
+    { label: copy("内存", "Memory"), value: `${Math.round(memUsage)}%` },
+    { label: copy("磁盘", "Disk"), value: `${Math.round(diskUsage)}%` },
+    { label: copy("进程", "Processes"), value: `${processCount}` },
+  ];
+
+  const providerLabel = node?.group || node?.virtualization || copy("未标注来源", "Unknown source");
 
   const handleCopy = async (value: string) => {
     if (!value) return;
@@ -178,6 +207,42 @@ export default function InstancePage() {
               </div>
             </div>
           </div>
+
+          <section className="node-detail-mobile-device node-detail-animate" style={{ ["--delay" as any]: "80ms" }}>
+            <div className="node-detail-mobile-device-main">
+              <div className="node-detail-mobile-device-avatar">
+                <img src={osIcon} alt={node?.os ?? "OS"} />
+              </div>
+              <div className="node-detail-mobile-device-copy">
+                <div className="node-detail-mobile-device-label">{copy("设备状态总览", "Device Overview")}</div>
+                <div className="node-detail-mobile-device-title">{nodeName}</div>
+                <div className="node-detail-mobile-device-subtitle">{providerLabel}</div>
+                <div className="node-detail-mobile-device-tags">
+                  {mobileTelemetryTags.map((item) => (
+                    <span key={item.label} className="node-detail-mobile-device-tag">
+                      <span>{item.label}</span>
+                      <strong>{item.value}</strong>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {mobileSignals.length > 0 && (
+            <div className="node-detail-mobile-alert node-detail-animate" style={{ ["--delay" as any]: "100ms" }}>
+              <div className="node-detail-mobile-alert-icon">
+                <TriangleAlert size={16} />
+              </div>
+              <div className="node-detail-mobile-alert-copy">
+                <strong>{copy("巡检提醒", "Inspection Alert")}</strong>
+                <span>{mobileSignals[0]}</span>
+              </div>
+              <div className="node-detail-mobile-alert-pulse" aria-hidden="true">
+                <Zap size={14} />
+              </div>
+            </div>
+          )}
 
           <div className="node-detail-actions node-detail-actions-mobile node-detail-animate" style={{ ["--delay" as any]: "120ms" }}>
             {detailActions.map((action) => (
