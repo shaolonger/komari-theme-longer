@@ -1,5 +1,6 @@
 import { Dialog, Button } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
+import { Cpu, HardDrive, MemoryStick, Network, Tags } from "lucide-react";
 import { formatBytes, formatUptime } from "./Node";
 import { getTrafficStats } from "@/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
@@ -14,17 +15,76 @@ interface MobileDetailsCardProps {
   liveData?: Record;
 }
 
+type MobileTone = "cpu" | "memory" | "disk" | "network";
+
+const buildSparkBars = (seed: number) =>
+  Array.from({ length: 16 }, (_, index) => {
+    const raw = Math.abs(Math.sin(seed / 9 + index * 0.66)) * 100;
+    return 16 + (raw % 26);
+  });
+
+const getDaysUntil = (expiredAt?: string) => {
+  if (!expiredAt) return null;
+  const time = new Date(expiredAt).getTime();
+  if (Number.isNaN(time)) return null;
+  return Math.ceil((time - Date.now()) / (1000 * 60 * 60 * 24));
+};
+
+const MobileResourceCard = ({
+  title,
+  icon,
+  primary,
+  secondary,
+  footer,
+  tone,
+  barValue,
+  sparkSeed,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  primary: React.ReactNode;
+  secondary: React.ReactNode;
+  footer?: React.ReactNode;
+  tone: MobileTone;
+  barValue?: number;
+  sparkSeed: number;
+}) => {
+  const sparkBars = buildSparkBars(sparkSeed);
+
+  return (
+    <section className={`node-detail-mobile-resource-card is-${tone}`}>
+      <div className="node-detail-mobile-resource-head">
+        <div className="node-detail-mobile-resource-icon">{icon}</div>
+        <div className="node-detail-mobile-resource-title">{title}</div>
+      </div>
+      <div className="node-detail-mobile-resource-primary">{primary}</div>
+      <div className="node-detail-mobile-resource-secondary">{secondary}</div>
+      <div className="node-detail-mobile-resource-spark" aria-hidden="true">
+        {sparkBars.map((height, index) => (
+          <span key={`${title}-${index}`} style={{ height }} />
+        ))}
+      </div>
+      {typeof barValue === "number" ? <MetricBar value={barValue} compact /> : <div className="node-detail-mobile-resource-divider" />}
+      {footer && <div className="node-detail-mobile-resource-footer">{footer}</div>}
+    </section>
+  );
+};
+
 export const MobileDetailsCard: React.FC<MobileDetailsCardProps> = ({
   node,
   liveData,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isZh = i18n.resolvedLanguage?.toLowerCase().startsWith("zh");
+  const copy = (zh: string, en: string) => (isZh ? zh : en);
   const cpuUsage = liveData?.cpu.usage ?? 0;
   const memoryUsagePercent = node.mem_total && liveData ? (liveData.ram.used / node.mem_total) * 100 : 0;
   const diskUsagePercent = node.disk_total && liveData ? (liveData.disk.used / node.disk_total) * 100 : 0;
-  const swapUsagePercent = node.swap_total && liveData ? (liveData.swap.used / node.swap_total) * 100 : 0;
-
-  // 计算流量限制相关
+  const networkTotal = liveData ? liveData.network.totalUp + liveData.network.totalDown : 0;
+  const networkBarValue = Math.min(
+    100,
+    Math.max(0, (((liveData?.network.up || 0) + (liveData?.network.down || 0)) / 125000000) * 100)
+  );
   const trafficStats = liveData
     ? getTrafficStats(
         liveData.network.totalUp,
@@ -35,176 +95,137 @@ export const MobileDetailsCard: React.FC<MobileDetailsCardProps> = ({
     : { percentage: 0, usage: 0 };
   const hasTrafficLimit = Number(node.traffic_limit) > 0 && node.traffic_limit_type;
   const pingSummary = usePingSummary(node.uuid);
-
-  // 获取流量限制类型的显示文本
-  const getTrafficTypeDisplay = (type?: string) => {
-    switch(type) {
-      case 'max': return 'MAX';
-      case 'min': return 'MIN';
-      case 'sum': return 'SUM';
-      case 'up': return 'UP';
-      case 'down': return 'DOWN';
-      default: return '';
-    }
-  };
-
-  const cpuDisplay = liveData ? `${cpuUsage.toFixed(1)}%` : "-";
-  const memoryDisplay = liveData
-    ? `${formatBytes(liveData.ram.used || 0)} / ${formatBytes(node.mem_total)}`
-    : formatBytes(node.mem_total);
-  const diskDisplay = liveData
-    ? `${formatBytes(liveData.disk.used || 0)} / ${formatBytes(node.disk_total)}`
-    : formatBytes(node.disk_total);
-  const swapDisplay = liveData
-    ? `${formatBytes(liveData.swap.used || 0)} / ${formatBytes(node.swap_total)}`
-    : formatBytes(node.swap_total);
-  const networkSpeedLines = liveData
-    ? [`↑ ${formatBytes(liveData.network.up || 0)}/s`, `↓ ${formatBytes(liveData.network.down || 0)}/s`]
-    : "-";
-  const totalTrafficLines = liveData
-    ? [`↑ ${formatBytes(liveData.network.totalUp || 0)}`, `↓ ${formatBytes(liveData.network.totalDown || 0)}`]
-    : "-";
-
-  const formatLatency = (value: number | null) =>
-    value == null ? "-" : `${Math.round(value)} ms`;
-  const formatLoss = (value: number | null) =>
-    value == null ? "-" : `${value.toFixed(1)}%`;
-  const formatLoad = (value?: number) =>
-    typeof value === "number" && Number.isFinite(value) ? value.toFixed(2) : "-";
-  const loadLines = [
-    `1m: ${formatLoad(liveData?.load?.load1)}`,
-    `5m: ${formatLoad(liveData?.load?.load5)}`,
-    `15m: ${formatLoad(liveData?.load?.load15)}`,
-  ];
-  const latencyRows = pingSummary.items.map((item) => ({
-    name: item.name,
-    current: formatLatency(item.current),
-    avg: formatLatency(item.avg),
-    loss: formatLoss(item.loss),
-  }));
+  const expiryDays = getDaysUntil(node.expired_at);
+  const priceLabel = node.price > 0 ? `${node.currency || "$"}${node.price.toFixed(2)}` : copy("未设置", "Unset");
+  const expiryLabel =
+    expiryDays === null
+      ? copy("未设置", "Unset")
+      : expiryDays >= 0
+        ? copy(`${expiryDays} 天`, `${expiryDays} days`)
+        : copy("已过期", "Expired");
+  const tagList = (node.tags || "")
+    .split(/[，,\s]+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 4);
 
   return (
     <div className="node-detail-body">
-      <div className="node-detail-card node-detail-animate" style={{ ["--delay" as any]: "120ms" }}>
-        <div className="node-detail-section-title">{t("nodeCard.resource_usage")}</div>
-        <div className="node-detail-metric">
-          <div className="node-detail-metric-head">
-            <span className="node-detail-metric-label">{t("nodeCard.cpu")}</span>
-            <span className="node-detail-metric-value">{cpuDisplay}</span>
-          </div>
-          <MetricBar value={cpuUsage} compact />
-        </div>
-        <div className="node-detail-metric">
-          <div className="node-detail-metric-head">
-            <span className="node-detail-metric-label">{t("nodeCard.ram")}</span>
-            <span className="node-detail-metric-value">{memoryDisplay}</span>
-          </div>
-          <MetricBar value={memoryUsagePercent} compact />
-        </div>
-        <div className="node-detail-metric">
-          <div className="node-detail-metric-head">
-            <span className="node-detail-metric-label">{t("nodeCard.disk")}</span>
-            <span className="node-detail-metric-value">{diskDisplay}</span>
-          </div>
-          <MetricBar value={diskUsagePercent} compact />
-        </div>
-        {node.swap_total > 0 && (
-          <div className="node-detail-metric">
-            <div className="node-detail-metric-head">
-              <span className="node-detail-metric-label">{t("nodeCard.swap")}</span>
-              <span className="node-detail-metric-value">{swapDisplay}</span>
+      <div className="node-detail-mobile-resource-grid">
+        <MobileResourceCard
+          title={t("nodeCard.cpu")}
+          icon={<Cpu size={18} />}
+          primary={`${cpuUsage.toFixed(0)}%`}
+          secondary={`${liveData?.load?.load1?.toFixed(2) ?? "-"} / ${node.cpu_cores} ${copy("核", "cores")}`}
+          footer={copy("实时占用", "Utilization")}
+          tone="cpu"
+          barValue={cpuUsage}
+          sparkSeed={cpuUsage + 11}
+        />
+        <MobileResourceCard
+          title={t("nodeCard.ram")}
+          icon={<MemoryStick size={18} />}
+          primary={`${memoryUsagePercent.toFixed(0)}%`}
+          secondary={`${formatBytes(liveData?.ram.used || 0)} / ${formatBytes(node.mem_total)}`}
+          footer={copy("实时内存", "Memory usage")}
+          tone="memory"
+          barValue={memoryUsagePercent}
+          sparkSeed={memoryUsagePercent + 29}
+        />
+        <MobileResourceCard
+          title={t("nodeCard.disk")}
+          icon={<HardDrive size={18} />}
+          primary={`${diskUsagePercent.toFixed(0)}%`}
+          secondary={`${formatBytes(liveData?.disk.used || 0)} / ${formatBytes(node.disk_total)}`}
+          footer={copy("主存储", "Primary storage")}
+          tone="disk"
+          barValue={diskUsagePercent}
+          sparkSeed={diskUsagePercent + 47}
+        />
+        <MobileResourceCard
+          title={t("nodeCard.networkSpeed")}
+          icon={<Network size={18} />}
+          primary={
+            <div className="node-detail-mobile-network-primary">
+              <span>↓ {formatBytes(liveData?.network.down || 0)}/s</span>
+              <span>↑ {formatBytes(liveData?.network.up || 0)}/s</span>
             </div>
-            <MetricBar value={swapUsagePercent} compact />
+          }
+          secondary={formatBytes(networkTotal)}
+          footer={copy("累计流量", "Total traffic")}
+          tone="network"
+          barValue={networkBarValue}
+          sparkSeed={networkTotal / 1024 / 1024 + 73}
+        />
+      </div>
+
+      <div className="node-detail-mobile-summary-grid">
+        <div className="node-detail-summary-card node-detail-animate" style={{ ["--delay" as any]: "160ms" }}>
+          <div className="node-detail-summary-header">
+            <div className="node-detail-section-title">{copy("实例快照", "Instance Snapshot")}</div>
           </div>
-        )}
-        {hasTrafficLimit && (
-          <TrafficLimitChart
-            label={t("nodeCard.trafficLimit")}
-            type={getTrafficTypeDisplay(node.traffic_limit_type)}
-            percentage={trafficStats.percentage}
-            usedLabel={formatBytes(trafficStats.usage)}
-            limitLabel={formatBytes(node.traffic_limit || 0)}
-          />
-        )}
-      </div>
+          <div className="node-detail-summary-items mobile">
+            <DetailRow label={t("nodeCard.os")} value={node.os} closeLabel={copy("关闭", "Close")} />
+            <DetailRow label={t("nodeCard.arch")} value={node.arch} closeLabel={copy("关闭", "Close")} />
+            <DetailRow label={t("nodeCard.version")} value={node.version || "-"} closeLabel={copy("关闭", "Close")} />
+            <DetailRow label={t("nodeCard.uptime")} value={liveData?.uptime ? formatUptime(liveData.uptime, t) : "-"} closeLabel={copy("关闭", "Close")} />
+          </div>
+        </div>
 
-      <div className="node-detail-card node-detail-animate" style={{ ["--delay" as any]: "160ms" }}>
-        <div className="node-detail-section-title">{t("nodeCard.system_info")}</div>
-        <DetailRow label={t("nodeCard.os")} value={node.os} closeLabel={t("admin.nodeDetail.done")} />
-        <DetailRow label={t("nodeCard.kernelVersion")} value={node.kernel_version || "Unknown"} closeLabel={t("admin.nodeDetail.done")} />
-        <DetailRow label={t("nodeCard.arch")} value={node.arch} closeLabel={t("admin.nodeDetail.done")} />
-        <DetailRow label={t("nodeCard.virtualization")} value={node.virtualization || "Unknown"} closeLabel={t("admin.nodeDetail.done")} />
-      </div>
+        <div className="node-detail-summary-card node-detail-animate" style={{ ["--delay" as any]: "200ms" }}>
+          <div className="node-detail-summary-header">
+            <div className="node-detail-section-title">{copy("资产详情", "Asset Details")}</div>
+          </div>
+          <div className="node-detail-summary-items mobile">
+            <DetailRow label={copy("价格", "Price")} value={priceLabel} closeLabel={copy("关闭", "Close")} />
+            <DetailRow label={copy("到期", "Expiration")} value={expiryLabel} closeLabel={copy("关闭", "Close")} />
+            <DetailRow label={copy("分组", "Group")} value={node.group || copy("未分组", "Ungrouped")} closeLabel={copy("关闭", "Close")} />
+            <DetailRow label={copy("累计流量", "Total Traffic")} value={formatBytes(networkTotal)} closeLabel={copy("关闭", "Close")} />
+          </div>
 
-      <div className="node-detail-card node-detail-animate" style={{ ["--delay" as any]: "200ms" }}>
-        <div className="node-detail-section-title">{t("nodeCard.hardware_info")}</div>
-        <DetailRow label={t("nodeCard.cpu")} value={`${node.cpu_name} (x${node.cpu_cores})`} closeLabel={t("admin.nodeDetail.done")} />
-        <DetailRow label={t("admin.nodeDetail.gpu")} value={node.gpu_name || "Unknown"} closeLabel={t("admin.nodeDetail.done")} />
-        <DetailRow label={t("nodeCard.ram")} value={formatBytes(node.mem_total)} closeLabel={t("admin.nodeDetail.done")} />
-        <DetailRow label={t("nodeCard.disk")} value={formatBytes(node.disk_total)} closeLabel={t("admin.nodeDetail.done")} />
-      </div>
-
-      <div className="node-detail-card node-detail-animate" style={{ ["--delay" as any]: "240ms" }}>
-        <div className="node-detail-section-title">{t("nodeCard.network_info")}</div>
-        <DetailRow
-          label={t("nodeCard.networkSpeed")}
-          value={networkSpeedLines}
-          closeLabel={t("admin.nodeDetail.done")}
-        />
-        <DetailRow
-          label={t("nodeCard.totalTraffic")}
-          value={totalTrafficLines}
-          closeLabel={t("admin.nodeDetail.done")}
-        />
-        <DetailRow
-          label={t("nodeCard.connections")}
-          value={liveData ? `TCP: ${liveData.connections.tcp}, UDP: ${liveData.connections.udp}` : "-"}
-          closeLabel={t("admin.nodeDetail.done")}
-        />
-      </div>
-
-      <div className="node-detail-runtime-row node-detail-animate" style={{ ["--delay" as any]: "280ms" }}>
-        <div className="node-detail-card">
-          <div className="node-detail-section-title">{t("nodeCard.runtime_info")}</div>
-          <div className="node-detail-runtime-stack">
-            <DetailRow label={t("nodeCard.uptime")} value={liveData?.uptime ? formatUptime(liveData.uptime, t) : "-"} closeLabel={t("admin.nodeDetail.done")} />
-            <DetailRow label={t("nodeCard.process")} value={liveData?.process?.toString() || "-"} closeLabel={t("admin.nodeDetail.done")} />
-            <DetailRow label={t("nodeCard.load")} value={loadLines} closeLabel={t("admin.nodeDetail.done")} />
-            <DetailRow
-              label={t("nodeCard.last_updated")}
-              value={liveData?.updated_at ? new Date(liveData.updated_at).toLocaleString() : "-"}
-              closeLabel={t("admin.nodeDetail.done")}
+          {hasTrafficLimit ? (
+            <TrafficLimitChart
+              label={t("nodeCard.trafficLimit")}
+              type={node.traffic_limit_type}
+              percentage={trafficStats.percentage}
+              usedLabel={formatBytes(trafficStats.usage)}
+              limitLabel={formatBytes(node.traffic_limit || 0)}
             />
-          </div>
-        </div>
-        <div className="node-detail-card node-detail-latency-inline">
-          <div className="node-detail-section-title">{t("nodeCard.ping")}</div>
-          <div className="node-detail-latency-table">
-            <div className="node-detail-latency-row node-detail-latency-header">
-              <span className="node-detail-latency-cell name">{t("Task Name")}</span>
-              <span className="node-detail-latency-cell">{t("Current")}</span>
-              <span className="node-detail-latency-cell">{t("Avg")}</span>
-              <span className="node-detail-latency-cell">{t("Loss")}</span>
-            </div>
-            <div className="node-detail-latency-body">
-              {latencyRows.length ? (
-                latencyRows.map((row) => (
-                  <div key={row.name} className="node-detail-latency-row">
-                    <span className="node-detail-latency-cell name">{row.name}</span>
-                    <span className="node-detail-latency-cell">{row.current}</span>
-                    <span className="node-detail-latency-cell">{row.avg}</span>
-                    <span className="node-detail-latency-cell">{row.loss}</span>
-                  </div>
-                ))
+          ) : null}
+
+          <div className="node-detail-tag-list mobile">
+            <span className="node-detail-tag-title">
+              <Tags size={14} />
+              {copy("标签", "Tags")}
+            </span>
+            <div className="node-detail-tag-pills">
+              {tagList.length > 0 ? (
+                tagList.map((tag) => <span key={tag} className="node-detail-tag-pill">{tag}</span>)
               ) : (
-                <div className="node-detail-latency-row">
-                  <span className="node-detail-latency-cell name">-</span>
-                  <span className="node-detail-latency-cell">-</span>
-                  <span className="node-detail-latency-cell">-</span>
-                  <span className="node-detail-latency-cell">-</span>
-                </div>
+                <span className="node-detail-tag-empty">{copy("暂无标签", "No tags")}</span>
               )}
             </div>
+          </div>
+        </div>
+
+        <div className="node-detail-summary-card node-detail-animate" style={{ ["--delay" as any]: "240ms" }}>
+          <div className="node-detail-summary-header">
+            <div className="node-detail-section-title">{copy("延迟摘要", "Latency Summary")}</div>
+          </div>
+          <div className="node-detail-latency-list mobile">
+            {pingSummary.items.length > 0 ? (
+              pingSummary.items.slice(0, 4).map((item) => (
+                <div key={item.name} className="node-detail-latency-compact-row">
+                  <span>{item.name}</span>
+                  <span>{item.current == null ? "-" : `${Math.round(item.current)} ms`}</span>
+                </div>
+              ))
+            ) : (
+              <div className="node-detail-latency-compact-row">
+                <span>{copy("暂无 Ping 摘要", "No ping summary yet")}</span>
+                <span>-</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
