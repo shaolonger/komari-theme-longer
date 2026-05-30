@@ -1391,6 +1391,10 @@
   gap: 14px;
 }
 
+.node-detail-chart-grid-mobile {
+  grid-template-columns: 1fr;
+}
+
 .node-detail-chart-card.is-dual {
   min-height: 340px;
 }

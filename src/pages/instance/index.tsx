@@ -4,7 +4,6 @@ import { useLiveData } from "../../contexts/LiveDataContext";
 import { useTranslation } from "react-i18next";
 import type { Record } from "../../types/LiveData";
 import Flag from "../../components/Flag";
-import { SegmentedControl } from "@radix-ui/themes";
 import { useNodeList } from "@/contexts/NodeListContext";
 import { liveDataToRecords } from "@/utils/RecordHelper";
 import EnhancedLoadChart from "./EnhancedLoadChart";
@@ -26,7 +25,6 @@ export default function InstancePage() {
   const [recent, setRecent] = useState<Record[]>([]);
   const { nodeList } = useNodeList();
   const length = 60 * 5;
-  const [chartView, setChartView] = useState<"load" | "ping">("load");
   const isMobile = useIsMobile();
   const isZh = i18n.resolvedLanguage?.toLowerCase().startsWith("zh");
   const copy = (zh: string, en: string) => (isZh ? zh : en);
@@ -273,34 +271,34 @@ export default function InstancePage() {
 
           <MobileDetailsCard node={node} liveData={liveNodeData} />
 
-          <div className="node-detail-chart-card node-detail-animate" style={{ ["--delay" as any]: "200ms" }}>
-            <div className="node-detail-chart-header">
-              <div className="node-detail-section-title">{t("nodeCard.chart")}</div>
-              <SegmentedControl.Root
-                radius="full"
-                value={chartView}
-                onValueChange={(value) => setChartView(value as "load" | "ping")}
-                className="node-detail-toggle"
-              >
-                <SegmentedControl.Item value="load">
-                  {t("nodeCard.load")}
-                </SegmentedControl.Item>
-                <SegmentedControl.Item value="ping">
-                  {t("nodeCard.ping")}
-                </SegmentedControl.Item>
-              </SegmentedControl.Root>
-            </div>
-            <div className="node-detail-chart-body">
-              {chartView === "load" ? (
+          <div className="node-detail-chart-grid node-detail-chart-grid-mobile node-detail-animate" style={{ ["--delay" as any]: "200ms" }}>
+            <div className="node-detail-chart-card is-dual">
+              <div className="node-detail-chart-header">
+                <div>
+                  <div className="node-detail-section-title">{t("nodeCard.load")}</div>
+                  <div className="node-detail-chart-note">{copy("负载主图", "Primary load chart")}</div>
+                </div>
+              </div>
+              <div className="node-detail-chart-body">
                 <MobileLoadChart
                   data={liveDataToRecords(uuid ?? "", recent)}
                   liveData={liveNodeData}
                   node={node}
                   uuid={uuid}
                 />
-              ) : (
+              </div>
+            </div>
+
+            <div className="node-detail-chart-card is-dual">
+              <div className="node-detail-chart-header">
+                <div>
+                  <div className="node-detail-section-title">{t("nodeCard.ping")}</div>
+                  <div className="node-detail-chart-note">{copy("延迟次图", "Secondary latency chart")}</div>
+                </div>
+              </div>
+              <div className="node-detail-chart-body">
                 <PingChartV2 uuid={uuid ?? ""} />
-              )}
+              </div>
             </div>
           </div>
         </div>
