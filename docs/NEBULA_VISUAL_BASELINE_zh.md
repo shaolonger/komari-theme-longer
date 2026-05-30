@@ -12,13 +12,13 @@
 
 ### 首页
 
-1. 桌面主基准：[首页桌面版-final.png](D:/带回去的资料/自建梯子/开源工具/探针/komari-theme-longer/docs/首页桌面版-final.png)
-2. 移动端主基准：[首页手机版-final.png](D:/带回去的资料/自建梯子/开源工具/探针/komari-theme-longer/docs/首页手机版-final.png)
+1. 桌面主基准：[首页桌面版-final.png](D:/带回去的资料/自建梯子/开源工具/探针/komari-theme-longer/docs/visual-baseline/首页桌面版-final.png)
+2. 移动端主基准：[首页手机版-final.png](D:/带回去的资料/自建梯子/开源工具/探针/komari-theme-longer/docs/visual-baseline/首页手机版-final.png)
 
 ### 节点详情页
 
-1. 桌面主基准：[节点详情页桌面版-final.png](D:/带回去的资料/自建梯子/开源工具/探针/komari-theme-longer/docs/节点详情页桌面版-final.png)
-2. 移动端主基准：[节点详情页手机版-final.png](D:/带回去的资料/自建梯子/开源工具/探针/komari-theme-longer/docs/节点详情页手机版-final.png)
+1. 桌面主基准：[节点详情页桌面版-final.png](D:/带回去的资料/自建梯子/开源工具/探针/komari-theme-longer/docs/visual-baseline/节点详情页桌面版-final.png)
+2. 移动端主基准：[节点详情页手机版-final.png](D:/带回去的资料/自建梯子/开源工具/探针/komari-theme-longer/docs/visual-baseline/节点详情页手机版-final.png)
 
 ## 2. 实现优先级规则
 
