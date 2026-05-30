@@ -1,19 +1,29 @@
 import { Callout, Flex, Text } from "@radix-ui/themes";
 import { useTranslation } from "react-i18next";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import NodeDisplay from "../components/NodeDisplay";
 import NodeEarthView from "@/components/NodeEarthView";
 import { useLiveData } from "../contexts/LiveDataContext";
 import { useNodeList } from "@/contexts/NodeListContext";
 import Loading from "@/components/loading";
 import { formatBytes } from "@/components/Node";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Link } from "react-router-dom";
+import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import {
   Activity,
   AlertTriangle,
+  Bell,
+  Clock3,
+  Funnel,
   Globe2,
+  Home,
   Network,
+  Plus,
   RefreshCcw,
+  Server,
   ShieldAlert,
+  UserRound,
 } from "lucide-react";
 
 type InsightRow = {
@@ -21,6 +31,20 @@ type InsightRow = {
   value: string;
   tone?: "success" | "warning" | "danger" | "info";
   sublabel?: string;
+};
+
+type MobileFilter = "all" | "critical" | "traffic" | "expiring";
+
+type MobileNodeEntry = {
+  node: NodeBasicInfo;
+  live?: Record<string, any>;
+  online: boolean;
+  cpu: number;
+  mem: number;
+  disk: number;
+  traffic: number;
+  daysLeft: number | null;
+  warning: boolean;
 };
 
 const buildMiniBars = (seed: number) =>
@@ -96,10 +120,171 @@ const InsightSection = ({
   </div>
 );
 
+const MobileStatusCard = ({
+  label,
+  value,
+  meta,
+  accent,
+  icon,
+}: {
+  label: string;
+  value: string;
+  meta: string;
+  accent: "success" | "warning" | "danger" | "info" | "purple";
+  icon: React.ReactNode;
+}) => (
+  <article className={`nebula-mobile-status-card is-${accent}`}>
+    <div className="nebula-mobile-status-icon">{icon}</div>
+    <div className="nebula-mobile-status-label">{label}</div>
+    <div className="nebula-mobile-status-value">{value}</div>
+    <div className="nebula-mobile-status-meta">{meta}</div>
+    <div className="nebula-mobile-status-line" aria-hidden="true">
+      <span />
+    </div>
+  </article>
+);
+
+const getMobileStatusTone = (entry: MobileNodeEntry) => {
+  if (!entry.online) return "offline" as const;
+  if (entry.warning) return "warning" as const;
+  return "online" as const;
+};
+
+const MobileNodeCard = ({
+  entry,
+  copy,
+}: {
+  entry: MobileNodeEntry;
+  copy: (zh: string, en: string) => string;
+}) => {
+  const statusTone = getMobileStatusTone(entry);
+  const statusLabel =
+    statusTone === "offline"
+      ? copy("离线", "Offline")
+      : statusTone === "warning"
+        ? copy("预警", "Warning")
+        : copy("在线", "Online");
+
+  const expiryLabel =
+    entry.daysLeft === null
+      ? copy("未设置", "Unset")
+      : entry.daysLeft >= 0
+        ? copy(`${entry.daysLeft} 天`, `${entry.daysLeft} days`)
+        : copy("已过期", "Expired");
+
+  return (
+    <Link to={`/instance/${entry.node.uuid}`} className={`nebula-mobile-node-card is-${statusTone}`}>
+      <div className="nebula-mobile-node-header">
+        <div className="nebula-mobile-node-ident">
+          <div className="nebula-mobile-node-avatar">{entry.node.name.slice(0, 1).toUpperCase()}</div>
+          <div className="nebula-mobile-node-copy">
+            <div className="nebula-mobile-node-name-row">
+              <strong>{entry.node.name}</strong>
+            </div>
+            <div className="nebula-mobile-node-meta">
+              <span>{entry.node.region}</span>
+              <span>{entry.node.group || entry.node.arch || entry.node.os}</span>
+            </div>
+            <div className="nebula-mobile-node-submeta">
+              <span>{entry.live?.updated_at ? new Date(entry.live.updated_at).toLocaleTimeString() : copy("实时同步", "Live sync")}</span>
+              <span>{entry.node.version || "-"}</span>
+            </div>
+          </div>
+        </div>
+        <span className={`nebula-mobile-node-badge is-${statusTone}`}>{statusLabel}</span>
+      </div>
+
+      <div className="nebula-mobile-node-expiry">
+        <Clock3 size={14} />
+        <span>{copy("到期", "Expiry")}</span>
+        <strong>{expiryLabel}</strong>
+      </div>
+
+      <div className="nebula-mobile-node-metrics">
+        {[
+          { label: "CPU", value: `${Math.round(entry.cpu)}%`, percent: entry.cpu, tone: "success" },
+          { label: copy("内存", "Memory"), value: `${Math.round(entry.mem)}%`, percent: entry.mem, tone: "info" },
+          { label: copy("磁盘", "Disk"), value: `${Math.round(entry.disk)}%`, percent: entry.disk, tone: "purple" },
+          {
+            label: copy("网卡", "Net I/O"),
+            value: `${formatTrafficCompact(entry.traffic)}/s`,
+            percent: Math.min(100, Math.max(12, entry.traffic / 1024 / 1024 / 4)),
+            tone: "cyan",
+          },
+        ].map((metric) => (
+          <div key={`${entry.node.uuid}-${metric.label}`} className="nebula-mobile-node-metric">
+            <div className="nebula-mobile-node-metric-label">{metric.label}</div>
+            <div className="nebula-mobile-node-metric-value">{metric.value}</div>
+            <div className="nebula-mobile-node-metric-bar">
+              <span className={`is-${metric.tone}`} style={{ width: `${metric.percent}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </Link>
+  );
+};
+
+const MobileBottomNav = ({
+  copy,
+  onScrollTo,
+}: {
+  copy: (zh: string, en: string) => string;
+  onScrollTo: (id: string) => void;
+}) => {
+  const navItems = [
+    {
+      key: "home",
+      label: copy("首页", "Home"),
+      icon: <Home size={18} />,
+      onClick: () => onScrollTo("nebula-home-top"),
+      active: true,
+    },
+    {
+      key: "nodes",
+      label: copy("节点", "Nodes"),
+      icon: <Server size={18} />,
+      onClick: () => onScrollTo("nebula-home-explorer"),
+    },
+    {
+      key: "alerts",
+      label: copy("告警", "Alerts"),
+      icon: <Bell size={18} />,
+      onClick: () => onScrollTo("nebula-home-insights"),
+    },
+    {
+      key: "profile",
+      label: copy("后台", "Manage"),
+      icon: <UserRound size={18} />,
+      onClick: () => {
+        window.location.assign("/manage");
+      },
+    },
+  ];
+
+  return (
+    <nav className="nebula-mobile-bottom-nav">
+      {navItems.map((item) => (
+        <button
+          key={item.key}
+          type="button"
+          className={`nebula-mobile-bottom-item ${item.active ? "is-active" : ""}`}
+          onClick={item.onClick}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+};
+
 const Index = () => {
   const { i18n } = useTranslation();
   const { live_data } = useLiveData();
   const { nodeList, isLoading, error } = useNodeList();
+  const isMobile = useIsMobile();
+  const [mobileFilter, setMobileFilter] = useState<MobileFilter>("all");
   const isZh = i18n.resolvedLanguage?.toLowerCase().startsWith("zh");
   const copy = (zh: string, en: string) => (isZh ? zh : en);
 
@@ -281,6 +466,58 @@ const Index = () => {
     };
   }, [copy, liveMap, liveData.online, nodeList, onlineSet]);
 
+  const mobileRankedNodes = useMemo(() => {
+    const nodes = nodeList ?? [];
+
+    return nodes
+      .map((node) => {
+        const live = liveMap[node.uuid];
+        const cpu = live?.cpu?.usage || 0;
+        const mem = node.mem_total ? (((live?.ram?.used || 0) / node.mem_total) * 100) : 0;
+        const disk = node.disk_total ? (((live?.disk?.used || 0) / node.disk_total) * 100) : 0;
+        const traffic = (live?.network?.up || 0) + (live?.network?.down || 0);
+        const daysLeft = getDaysUntil(node.expired_at);
+        const online = onlineSet.has(node.uuid);
+        const warning = cpu >= 70 || mem >= 80 || disk >= 80 || (daysLeft !== null && daysLeft <= 14);
+
+        return {
+          node,
+          live,
+          online,
+          cpu,
+          mem,
+          disk,
+          traffic,
+          daysLeft,
+          warning,
+        } satisfies MobileNodeEntry;
+      })
+      .sort((left, right) => {
+        const leftSeverity = !left.online ? 3 : left.warning ? 2 : 1;
+        const rightSeverity = !right.online ? 3 : right.warning ? 2 : 1;
+        if (leftSeverity !== rightSeverity) return rightSeverity - leftSeverity;
+        if (left.traffic !== right.traffic) return right.traffic - left.traffic;
+        return right.cpu - left.cpu;
+      });
+  }, [liveMap, nodeList, onlineSet]);
+
+  const mobileVisibleNodes = useMemo(() => {
+    const filtered = mobileRankedNodes.filter((entry) => {
+      if (mobileFilter === "critical") {
+        return !entry.online || entry.warning;
+      }
+      if (mobileFilter === "traffic") {
+        return entry.traffic > 0;
+      }
+      if (mobileFilter === "expiring") {
+        return entry.daysLeft !== null && entry.daysLeft <= 30;
+      }
+      return true;
+    });
+
+    return (filtered.length > 0 ? filtered : mobileRankedNodes).slice(0, 4);
+  }, [mobileFilter, mobileRankedNodes]);
+
   if (isLoading) {
     return <Loading />;
   }
@@ -292,6 +529,144 @@ const Index = () => {
   const totalCount = nodeList?.length ?? 0;
   const onlinePercent = totalCount > 0 ? (dashboard.onlineCount / totalCount) * 100 : 0;
   const regionPercent = totalCount > 0 ? (dashboard.activeRegions / Math.max(totalCount, 1)) * 100 : 0;
+
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  if (isMobile) {
+    const mobileInsights = dashboard.latestSignals.length > 0
+      ? dashboard.latestSignals.slice(0, 3)
+      : [
+          {
+            name: copy("当前没有高优先级异常", "No high-priority anomalies right now"),
+            value: copy("稳定", "Stable"),
+            tone: "success" as const,
+            sublabel: copy("系统整体处于可控状态", "The fleet is operating within expected thresholds"),
+          },
+        ];
+
+    const mobileFilters = [
+      { key: "all" as const, label: copy("全部节点", "All Nodes") },
+      { key: "critical" as const, label: copy("关键", "Critical") },
+      { key: "traffic" as const, label: copy("流量", "Traffic") },
+      { key: "expiring" as const, label: copy("到期", "Expiring") },
+    ];
+
+    return (
+      <section className="nebula-mobile-home" id="nebula-home-top">
+        <Callouts />
+
+        <div className="nebula-mobile-metric-strip">
+          <MobileStatusCard
+            label={copy("在线", "Online")}
+            value={`${dashboard.onlineCount}`}
+            meta={`${onlinePercent.toFixed(1)}%`}
+            accent="success"
+            icon={<Activity size={18} />}
+          />
+          <MobileStatusCard
+            label={copy("预警", "Warning")}
+            value={`${dashboard.warningNodes}`}
+            meta={copy("高负载", "Hot nodes")}
+            accent="warning"
+            icon={<AlertTriangle size={18} />}
+          />
+          <MobileStatusCard
+            label={copy("离线", "Offline")}
+            value={`${dashboard.offlineCount}`}
+            meta={copy("需排查", "Review now")}
+            accent="danger"
+            icon={<ShieldAlert size={18} />}
+          />
+          <MobileStatusCard
+            label={copy("地区", "Regions")}
+            value={`${dashboard.activeRegions}`}
+            meta={`${regionPercent.toFixed(1)}%`}
+            accent="info"
+            icon={<Globe2 size={18} />}
+          />
+          <MobileStatusCard
+            label={copy("总流量", "Traffic")}
+            value={formatTrafficCompact(dashboard.totalTraffic)}
+            meta={copy("实时汇总", "Realtime")}
+            accent="purple"
+            icon={<Network size={18} />}
+          />
+        </div>
+
+        <div className="nebula-mobile-filter-tabs">
+          {mobileFilters.map((filter) => (
+            <button
+              key={filter.key}
+              type="button"
+              className={`nebula-mobile-filter-tab ${mobileFilter === filter.key ? "is-active" : ""}`}
+              onClick={() => setMobileFilter(filter.key)}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="nebula-mobile-filter-panel">
+          <button type="button" className="nebula-mobile-filter-chip" onClick={() => setMobileFilter("all")}>
+            <span>{copy("分组", "Group")}</span>
+            <strong>{copy("全部", "All")}</strong>
+          </button>
+          <button type="button" className="nebula-mobile-filter-chip" onClick={() => setMobileFilter("critical")}>
+            <span>{copy("状态", "Status")}</span>
+            <strong>{mobileFilter === "critical" ? copy("关键", "Critical") : copy("全部", "All")}</strong>
+          </button>
+          <button type="button" className="nebula-mobile-filter-chip" onClick={() => setMobileFilter("traffic")}>
+            <span>{copy("区域", "Region")}</span>
+            <strong>{copy("全球", "Global")}</strong>
+          </button>
+          <button type="button" className="nebula-mobile-filter-chip" onClick={() => setMobileFilter("expiring")}>
+            <span>{copy("生命周期", "Lifecycle")}</span>
+            <strong>{mobileFilter === "expiring" ? copy("即将到期", "Expiring") : copy("全部", "All")}</strong>
+          </button>
+          <button type="button" className="nebula-mobile-filter-action" onClick={() => scrollToSection("nebula-home-explorer")}>
+            <Funnel size={18} />
+          </button>
+        </div>
+
+        <div className="nebula-mobile-node-stack" id="nebula-home-nodes">
+          {mobileVisibleNodes.map((entry) => (
+            <MobileNodeCard key={entry.node.uuid} entry={entry} copy={copy} />
+          ))}
+        </div>
+
+        <section className="nebula-surface nebula-mobile-insights-card" id="nebula-home-insights">
+          <div className="nebula-panel-header">
+            <div>
+              <div className="nebula-section-kicker">{copy("洞察", "Insights")}</div>
+              <h3 className="nebula-section-title">{copy("移动巡检重点", "Mobile watchlist")}</h3>
+            </div>
+            <button type="button" className="nebula-mobile-inline-link" onClick={() => scrollToSection("nebula-home-explorer")}>
+              {copy("查看全部", "View all")}
+            </button>
+          </div>
+          <InsightSection title={copy("当前重点事项", "Priority Signals")} rows={mobileInsights} />
+        </section>
+
+        <section className="nebula-surface nebula-mobile-explorer" id="nebula-home-explorer">
+          <div className="nebula-panel-header">
+            <div>
+              <div className="nebula-section-kicker">{copy("节点浏览", "Explorer")}</div>
+              <h3 className="nebula-section-title">{copy("完整节点列表与搜索", "Full node explorer and search")}</h3>
+            </div>
+          </div>
+          <NodeDisplay nodes={nodeList ?? []} liveData={liveData} />
+        </section>
+
+        <button type="button" className="nebula-mobile-fab" onClick={() => window.location.assign("/manage") }>
+          <Plus size={22} />
+        </button>
+
+        <MobileBottomNav copy={copy} onScrollTo={scrollToSection} />
+      </section>
+    );
+  }
 
   return (
     <section className="nebula-home-shell" id="nebula-home-top">

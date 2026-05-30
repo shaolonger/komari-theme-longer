@@ -749,6 +749,422 @@ body {
   color: rgba(244, 247, 255, 0.98);
 }
 
+.nebula-mobile-home {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding-bottom: 7.2rem;
+}
+
+.nebula-mobile-metric-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.nebula-mobile-status-card {
+  display: flex;
+  min-height: 7.6rem;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.95rem 0.95rem 0.8rem;
+  border-radius: 1.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(12, 20, 37, 0.94), rgba(8, 14, 27, 0.9));
+  box-shadow: 0 20px 42px rgba(1, 7, 17, 0.32);
+}
+
+.nebula-mobile-status-card.is-success {
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.18), 0 20px 42px rgba(1, 7, 17, 0.32);
+}
+
+.nebula-mobile-status-card.is-warning {
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.18), 0 20px 42px rgba(1, 7, 17, 0.32);
+}
+
+.nebula-mobile-status-card.is-danger {
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.18), 0 20px 42px rgba(1, 7, 17, 0.32);
+}
+
+.nebula-mobile-status-card.is-info {
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.18), 0 20px 42px rgba(1, 7, 17, 0.32);
+}
+
+.nebula-mobile-status-card.is-purple {
+  box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.18), 0 20px 42px rgba(1, 7, 17, 0.32);
+}
+
+.nebula-mobile-status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(241, 245, 255, 0.96);
+}
+
+.nebula-mobile-status-label {
+  font-size: 0.74rem;
+  color: rgba(178, 189, 219, 0.72);
+}
+
+.nebula-mobile-status-value {
+  font-size: 1.7rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: rgba(245, 247, 255, 0.98);
+}
+
+.nebula-mobile-status-meta {
+  font-size: 0.78rem;
+  color: rgba(173, 186, 216, 0.74);
+}
+
+.nebula-mobile-status-line {
+  margin-top: auto;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.nebula-mobile-status-line span {
+  display: block;
+  width: 72%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(132, 137, 255, 0.98), rgba(58, 167, 255, 0.62));
+}
+
+.nebula-mobile-filter-tabs,
+.nebula-mobile-filter-panel {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.1rem;
+  scrollbar-width: none;
+}
+
+.nebula-mobile-filter-tabs::-webkit-scrollbar,
+.nebula-mobile-filter-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.nebula-mobile-filter-tab,
+.nebula-mobile-filter-chip,
+.nebula-mobile-filter-action,
+.nebula-mobile-inline-link {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(13, 22, 40, 0.95), rgba(8, 14, 27, 0.92));
+  color: rgba(237, 241, 255, 0.92);
+}
+
+.nebula-mobile-filter-tab {
+  min-height: 2.65rem;
+  padding: 0 1rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.nebula-mobile-filter-tab.is-active {
+  border-color: rgba(97, 124, 255, 0.28);
+  box-shadow: inset 0 0 0 1px rgba(97, 124, 255, 0.22), 0 14px 30px rgba(1, 7, 17, 0.26);
+}
+
+.nebula-mobile-filter-chip {
+  display: flex;
+  min-width: 8rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.12rem;
+  padding: 0.75rem 0.95rem;
+  border-radius: 1.2rem;
+  text-align: left;
+}
+
+.nebula-mobile-filter-chip span {
+  font-size: 0.72rem;
+  color: rgba(173, 186, 216, 0.7);
+}
+
+.nebula-mobile-filter-chip strong {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: rgba(244, 247, 255, 0.98);
+}
+
+.nebula-mobile-filter-action {
+  display: inline-flex;
+  width: 3.2rem;
+  height: 3.2rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.nebula-mobile-node-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.nebula-mobile-node-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  padding: 1rem;
+  border-radius: 1.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(12, 20, 37, 0.94), rgba(8, 14, 27, 0.9)),
+    radial-gradient(circle at top left, rgba(88, 97, 255, 0.12), transparent 26%);
+  box-shadow: 0 22px 48px rgba(1, 7, 17, 0.34);
+}
+
+.nebula-mobile-node-card.is-online {
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.16), 0 22px 48px rgba(1, 7, 17, 0.34);
+}
+
+.nebula-mobile-node-card.is-warning {
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.16), 0 22px 48px rgba(1, 7, 17, 0.34);
+}
+
+.nebula-mobile-node-card.is-offline {
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.16), 0 22px 48px rgba(1, 7, 17, 0.34);
+}
+
+.nebula-mobile-node-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.nebula-mobile-node-ident {
+  display: flex;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.nebula-mobile-node-avatar {
+  display: inline-flex;
+  width: 2.8rem;
+  height: 2.8rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(115, 123, 255, 0.96), rgba(71, 145, 255, 0.42));
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 14px 28px rgba(78, 101, 255, 0.24);
+}
+
+.nebula-mobile-node-copy {
+  min-width: 0;
+}
+
+.nebula-mobile-node-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nebula-mobile-node-name-row strong {
+  font-size: 0.98rem;
+  color: rgba(245, 247, 255, 0.98);
+}
+
+.nebula-mobile-node-meta,
+.nebula-mobile-node-submeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.6rem;
+  margin-top: 0.22rem;
+  font-size: 0.76rem;
+  color: rgba(173, 186, 216, 0.74);
+}
+
+.nebula-mobile-node-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.9rem;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nebula-mobile-node-badge.is-online {
+  color: #7bf1ab;
+  background: rgba(17, 53, 34, 0.7);
+}
+
+.nebula-mobile-node-badge.is-warning {
+  color: #ffd173;
+  background: rgba(68, 44, 10, 0.7);
+}
+
+.nebula-mobile-node-badge.is-offline {
+  color: #f79c9c;
+  background: rgba(72, 23, 23, 0.7);
+}
+
+.nebula-mobile-node-expiry {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: rgba(182, 194, 224, 0.78);
+}
+
+.nebula-mobile-node-expiry strong {
+  color: rgba(244, 247, 255, 0.98);
+}
+
+.nebula-mobile-node-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.nebula-mobile-node-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  min-width: 0;
+  padding: 0.75rem 0.8rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.nebula-mobile-node-metric-label {
+  font-size: 0.7rem;
+  color: rgba(173, 186, 216, 0.72);
+}
+
+.nebula-mobile-node-metric-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(244, 247, 255, 0.98);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nebula-mobile-node-metric-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.nebula-mobile-node-metric-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.nebula-mobile-node-metric-bar span.is-success {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.95), rgba(86, 241, 152, 0.65));
+}
+
+.nebula-mobile-node-metric-bar span.is-info {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.95), rgba(96, 165, 250, 0.65));
+}
+
+.nebula-mobile-node-metric-bar span.is-purple {
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.95), rgba(167, 139, 250, 0.65));
+}
+
+.nebula-mobile-node-metric-bar span.is-cyan {
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.95), rgba(103, 232, 249, 0.65));
+}
+
+.nebula-mobile-insights-card,
+.nebula-mobile-explorer {
+  padding: 1rem;
+}
+
+.nebula-mobile-inline-link {
+  display: inline-flex;
+  min-height: 2.2rem;
+  align-items: center;
+  padding: 0 0.85rem;
+  font-size: 0.78rem;
+}
+
+.nebula-mobile-explorer .control-bar,
+.nebula-mobile-explorer .mx-4.mb-2.-mt-2,
+.nebula-mobile-explorer .mx-4.mb-2,
+.nebula-mobile-explorer .pagination-container {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.nebula-mobile-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 5.6rem;
+  z-index: 20;
+  display: inline-flex;
+  width: 3.5rem;
+  height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(114, 123, 255, 0.24);
+  background: linear-gradient(180deg, rgba(93, 108, 255, 0.98), rgba(76, 139, 255, 0.92));
+  color: white;
+  box-shadow: 0 24px 44px rgba(67, 98, 255, 0.34);
+}
+
+.nebula-mobile-bottom-nav {
+  position: fixed;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  z-index: 19;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.55rem;
+  border-radius: 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(6, 12, 24, 0.9);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 42px rgba(1, 7, 17, 0.38);
+}
+
+.nebula-mobile-bottom-item {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 3.3rem;
+  border-radius: 1rem;
+  color: rgba(174, 186, 216, 0.76);
+}
+
+.nebula-mobile-bottom-item span {
+  font-size: 0.7rem;
+}
+
+.nebula-mobile-bottom-item.is-active {
+  background: linear-gradient(180deg, rgba(16, 27, 48, 0.95), rgba(9, 16, 31, 0.9));
+  color: rgba(244, 247, 255, 0.98);
+  box-shadow: inset 0 0 0 1px rgba(91, 122, 255, 0.2);
+}
+
 .control-bar,
 .status-bar-container,
 .mx-4.mb-2.-mt-2,
@@ -782,6 +1198,10 @@ body {
 }
 
 @media (max-width: 768px) {
+  .nebula-mobile-metric-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .nebula-topbar {
     padding: 0.8rem;
   }
@@ -820,6 +1240,26 @@ body {
 }
 
 @media (max-width: 560px) {
+  .nebula-mobile-metric-strip,
+  .nebula-mobile-node-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nebula-mobile-status-card,
+  .nebula-mobile-node-card,
+  .nebula-mobile-insights-card,
+  .nebula-mobile-explorer {
+    padding: 0.9rem;
+  }
+
+  .nebula-mobile-node-header {
+    flex-direction: column;
+  }
+
+  .nebula-mobile-node-badge {
+    align-self: flex-start;
+  }
+
   .nebula-main-column {
     padding: 0.65rem;
   }
