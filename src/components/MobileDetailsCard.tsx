@@ -108,6 +108,7 @@ export const MobileDetailsCard: React.FC<MobileDetailsCardProps> = ({
     .map((item) => item.trim())
     .filter(Boolean)
     .slice(0, 4);
+  const [activePanel, setActivePanel] = useState<"snapshot" | "asset" | "latency">("snapshot");
 
   return (
     <div className="node-detail-body">
@@ -160,74 +161,108 @@ export const MobileDetailsCard: React.FC<MobileDetailsCardProps> = ({
       </div>
 
       <div className="node-detail-mobile-summary-grid">
-        <div className="node-detail-summary-card node-detail-animate" style={{ ["--delay" as any]: "160ms" }}>
-          <div className="node-detail-summary-header">
-            <div className="node-detail-section-title">{copy("实例快照", "Instance Snapshot")}</div>
-          </div>
-          <div className="node-detail-summary-items mobile">
-            <DetailRow label={t("nodeCard.os")} value={node.os} closeLabel={copy("关闭", "Close")} />
-            <DetailRow label={t("nodeCard.arch")} value={node.arch} closeLabel={copy("关闭", "Close")} />
-            <DetailRow label={t("nodeCard.version")} value={node.version || "-"} closeLabel={copy("关闭", "Close")} />
-            <DetailRow label={t("nodeCard.uptime")} value={liveData?.uptime ? formatUptime(liveData.uptime, t) : "-"} closeLabel={copy("关闭", "Close")} />
-          </div>
+        <div className="node-detail-mobile-panel-tabs" role="tablist" aria-label={copy("详情面板", "Detail Panels") }>
+          <button
+            type="button"
+            className={`node-detail-mobile-panel-tab ${activePanel === "snapshot" ? "is-active" : ""}`}
+            onClick={() => setActivePanel("snapshot")}
+          >
+            {copy("概览", "Overview")}
+          </button>
+          <button
+            type="button"
+            className={`node-detail-mobile-panel-tab ${activePanel === "asset" ? "is-active" : ""}`}
+            onClick={() => setActivePanel("asset")}
+          >
+            {copy("资产", "Assets")}
+          </button>
+          <button
+            type="button"
+            className={`node-detail-mobile-panel-tab ${activePanel === "latency" ? "is-active" : ""}`}
+            onClick={() => setActivePanel("latency")}
+          >
+            {copy("延迟", "Latency")}
+          </button>
         </div>
 
-        <div className="node-detail-summary-card node-detail-animate" style={{ ["--delay" as any]: "200ms" }}>
-          <div className="node-detail-summary-header">
-            <div className="node-detail-section-title">{copy("资产详情", "Asset Details")}</div>
+        {activePanel === "snapshot" && (
+          <div className="node-detail-summary-card node-detail-animate" style={{ ["--delay" as any]: "160ms" }}>
+            <div className="node-detail-summary-header">
+              <div className="node-detail-section-title">{copy("实例快照", "Instance Snapshot")}</div>
+            </div>
+            <div className="node-detail-summary-items mobile">
+              <DetailRow label={t("nodeCard.os")} value={node.os} closeLabel={copy("关闭", "Close")} />
+              <DetailRow label={t("nodeCard.arch")} value={node.arch} closeLabel={copy("关闭", "Close")} />
+              <DetailRow label={t("nodeCard.version")} value={node.version || "-"} closeLabel={copy("关闭", "Close")} />
+              <DetailRow label={t("nodeCard.uptime")} value={liveData?.uptime ? formatUptime(liveData.uptime, t) : "-"} closeLabel={copy("关闭", "Close")} />
+              <DetailRow label={copy("更新时间", "Updated")} value={liveData?.updated_at ? new Date(liveData.updated_at).toLocaleString() : "-"} closeLabel={copy("关闭", "Close")} />
+              <DetailRow label={copy("虚拟化", "Virtualization")} value={node.virtualization || "-"} closeLabel={copy("关闭", "Close")} />
+            </div>
           </div>
-          <div className="node-detail-summary-items mobile">
-            <DetailRow label={copy("价格", "Price")} value={priceLabel} closeLabel={copy("关闭", "Close")} />
-            <DetailRow label={copy("到期", "Expiration")} value={expiryLabel} closeLabel={copy("关闭", "Close")} />
-            <DetailRow label={copy("分组", "Group")} value={node.group || copy("未分组", "Ungrouped")} closeLabel={copy("关闭", "Close")} />
-            <DetailRow label={copy("累计流量", "Total Traffic")} value={formatBytes(networkTotal)} closeLabel={copy("关闭", "Close")} />
+        )}
+
+        {activePanel === "asset" && (
+          <div className="node-detail-summary-card node-detail-animate" style={{ ["--delay" as any]: "180ms" }}>
+            <div className="node-detail-summary-header">
+              <div className="node-detail-section-title">{copy("资产详情", "Asset Details")}</div>
+            </div>
+            <div className="node-detail-summary-items mobile">
+              <DetailRow label={copy("价格", "Price")} value={priceLabel} closeLabel={copy("关闭", "Close")} />
+              <DetailRow label={copy("到期", "Expiration")} value={expiryLabel} closeLabel={copy("关闭", "Close")} />
+              <DetailRow label={copy("分组", "Group")} value={node.group || copy("未分组", "Ungrouped")} closeLabel={copy("关闭", "Close")} />
+              <DetailRow label={copy("累计流量", "Total Traffic")} value={formatBytes(networkTotal)} closeLabel={copy("关闭", "Close")} />
+            </div>
+
+            {hasTrafficLimit ? (
+              <TrafficLimitChart
+                label={t("nodeCard.trafficLimit")}
+                type={node.traffic_limit_type}
+                percentage={trafficStats.percentage}
+                usedLabel={formatBytes(trafficStats.usage)}
+                limitLabel={formatBytes(node.traffic_limit || 0)}
+              />
+            ) : (
+              <div className="node-detail-summary-empty">{copy("未配置流量上限", "No traffic limit configured")}</div>
+            )}
+
+            <div className="node-detail-tag-list mobile">
+              <span className="node-detail-tag-title">
+                <Tags size={14} />
+                {copy("标签", "Tags")}
+              </span>
+              <div className="node-detail-tag-pills">
+                {tagList.length > 0 ? (
+                  tagList.map((tag) => <span key={tag} className="node-detail-tag-pill">{tag}</span>)
+                ) : (
+                  <span className="node-detail-tag-empty">{copy("暂无标签", "No tags")}</span>
+                )}
+              </div>
+            </div>
           </div>
+        )}
 
-          {hasTrafficLimit ? (
-            <TrafficLimitChart
-              label={t("nodeCard.trafficLimit")}
-              type={node.traffic_limit_type}
-              percentage={trafficStats.percentage}
-              usedLabel={formatBytes(trafficStats.usage)}
-              limitLabel={formatBytes(node.traffic_limit || 0)}
-            />
-          ) : null}
-
-          <div className="node-detail-tag-list mobile">
-            <span className="node-detail-tag-title">
-              <Tags size={14} />
-              {copy("标签", "Tags")}
-            </span>
-            <div className="node-detail-tag-pills">
-              {tagList.length > 0 ? (
-                tagList.map((tag) => <span key={tag} className="node-detail-tag-pill">{tag}</span>)
+        {activePanel === "latency" && (
+          <div className="node-detail-summary-card node-detail-animate" style={{ ["--delay" as any]: "200ms" }}>
+            <div className="node-detail-summary-header">
+              <div className="node-detail-section-title">{copy("延迟摘要", "Latency Summary")}</div>
+            </div>
+            <div className="node-detail-latency-list mobile">
+              {pingSummary.items.length > 0 ? (
+                pingSummary.items.slice(0, 6).map((item) => (
+                  <div key={item.name} className="node-detail-latency-compact-row">
+                    <span>{item.name}</span>
+                    <span>{item.current == null ? "-" : `${Math.round(item.current)} ms`}</span>
+                  </div>
+                ))
               ) : (
-                <span className="node-detail-tag-empty">{copy("暂无标签", "No tags")}</span>
+                <div className="node-detail-latency-compact-row">
+                  <span>{copy("暂无 Ping 摘要", "No ping summary yet")}</span>
+                  <span>-</span>
+                </div>
               )}
             </div>
           </div>
-        </div>
-
-        <div className="node-detail-summary-card node-detail-animate" style={{ ["--delay" as any]: "240ms" }}>
-          <div className="node-detail-summary-header">
-            <div className="node-detail-section-title">{copy("延迟摘要", "Latency Summary")}</div>
-          </div>
-          <div className="node-detail-latency-list mobile">
-            {pingSummary.items.length > 0 ? (
-              pingSummary.items.slice(0, 4).map((item) => (
-                <div key={item.name} className="node-detail-latency-compact-row">
-                  <span>{item.name}</span>
-                  <span>{item.current == null ? "-" : `${Math.round(item.current)} ms`}</span>
-                </div>
-              ))
-            ) : (
-              <div className="node-detail-latency-compact-row">
-                <span>{copy("暂无 Ping 摘要", "No ping summary yet")}</span>
-                <span>-</span>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
