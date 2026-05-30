@@ -43,6 +43,7 @@ type SpotlightNode = {
 };
 
 type MobileFilter = "all" | "critical" | "traffic" | "expiring";
+type DesktopFilter = "all" | "online" | "warning" | "offline" | "expiring";
 
 type MobileNodeEntry = {
   node: NodeBasicInfo;
@@ -308,6 +309,9 @@ const Index = () => {
   const { nodeList, isLoading, error } = useNodeList();
   const isMobile = useIsMobile();
   const [mobileFilter, setMobileFilter] = useState<MobileFilter>("all");
+  const [desktopFilter, setDesktopFilter] = useState<DesktopFilter>("all");
+  const [desktopSearch, setDesktopSearch] = useState("");
+  const [desktopRegion, setDesktopRegion] = useState("all");
   const isZh = i18n.resolvedLanguage?.toLowerCase().startsWith("zh");
   const copy = (zh: string, en: string) => (isZh ? zh : en);
 
@@ -586,6 +590,47 @@ const Index = () => {
     return (filtered.length > 0 ? filtered : mobileRankedNodes).slice(0, 4);
   }, [mobileFilter, mobileRankedNodes]);
 
+  const desktopRegions = useMemo(() => {
+    return Array.from(new Set((nodeList ?? []).map((node) => node.region).filter(Boolean))).sort();
+  }, [nodeList]);
+
+  const desktopVisibleNodes = useMemo(() => {
+    const nodes = nodeList ?? [];
+    const term = desktopSearch.trim().toLowerCase();
+
+    return nodes.filter((node) => {
+      const live = liveMap[node.uuid];
+      const online = onlineSet.has(node.uuid);
+      const cpu = live?.cpu?.usage || 0;
+      const mem = node.mem_total ? (((live?.ram?.used || 0) / node.mem_total) * 100) : 0;
+      const disk = node.disk_total ? (((live?.disk?.used || 0) / node.disk_total) * 100) : 0;
+      const daysLeft = getDaysUntil(node.expired_at);
+      const warning = cpu >= 70 || mem >= 80 || disk >= 80 || (daysLeft !== null && daysLeft <= 14);
+
+      const byFilter =
+        desktopFilter === "all"
+          ? true
+          : desktopFilter === "online"
+            ? online
+            : desktopFilter === "warning"
+              ? online && warning
+              : desktopFilter === "offline"
+                ? !online
+                : daysLeft !== null && daysLeft <= 30;
+
+      const byRegion = desktopRegion === "all" ? true : node.region === desktopRegion;
+
+      const bySearch =
+        term.length === 0
+          ? true
+          : [node.name, node.region, node.group, node.os, node.arch, node.version]
+              .filter(Boolean)
+              .some((value) => value.toLowerCase().includes(term));
+
+      return byFilter && byRegion && bySearch;
+    });
+  }, [desktopFilter, desktopRegion, desktopSearch, liveMap, nodeList, onlineSet]);
+
   if (isLoading) {
     return <Loading />;
   }
@@ -835,6 +880,53 @@ const Index = () => {
         </div>
       </section>
 
+      <section className="nebula-surface nebula-desktop-filter-surface">
+        <div className="nebula-desktop-filter-row">
+          {([
+            { key: "all", label: copy("全部", "All") },
+            { key: "online", label: copy("在线", "Online") },
+            { key: "warning", label: copy("告警", "Warning") },
+            { key: "offline", label: copy("离线", "Offline") },
+            { key: "expiring", label: copy("即将到期", "Expiring") },
+          ] as { key: DesktopFilter; label: string }[]).map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              className={`nebula-desktop-filter-chip ${desktopFilter === item.key ? "is-active" : ""}`}
+              onClick={() => setDesktopFilter(item.key)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="nebula-desktop-filter-row is-secondary">
+          <input
+            type="text"
+            className="nebula-desktop-filter-search"
+            value={desktopSearch}
+            onChange={(event) => setDesktopSearch(event.target.value)}
+            placeholder={copy("搜索名称/地区/分组/系统", "Search name/region/group/os")}
+          />
+          <select
+            className="nebula-desktop-filter-select"
+            value={desktopRegion}
+            onChange={(event) => setDesktopRegion(event.target.value)}
+          >
+            <option value="all">{copy("全部地区", "All regions")}</option>
+            {desktopRegions.map((region) => (
+              <option key={region} value={region}>
+                {region}
+              </option>
+            ))}
+          </select>
+          <div className="nebula-desktop-filter-summary">
+            {copy("结果", "Results")}
+            <strong>{desktopVisibleNodes.length}</strong>
+          </div>
+        </div>
+      </section>
+
       <div className="nebula-home-grid">
         <div className="nebula-home-main" id="nebula-home-nodes">
           <div className="nebula-surface nebula-section-surface">
@@ -847,7 +939,7 @@ const Index = () => {
                 {copy("按视觉基准图保留搜索、分组、视图切换与节点卡矩阵。", "Preserve search, grouping, view switching, and node matrix from the visual baseline.")}
               </div>
             </div>
-            <NodeDisplay nodes={nodeList ?? []} liveData={liveData} />
+            <NodeDisplay nodes={desktopVisibleNodes} liveData={liveData} />
           </div>
         </div>
 
