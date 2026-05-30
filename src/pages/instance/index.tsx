@@ -408,30 +408,29 @@ export default function InstancePage() {
 
             {node && <DesktopDetailsCard node={node} liveData={liveNodeData} />}
 
-            <div className="node-detail-chart-card node-detail-animate" style={{ ["--delay" as any]: "320ms" }}>
-              <div className="node-detail-chart-header">
-                <div className="node-detail-section-title">{t("nodeCard.chart")}</div>
-                <SegmentedControl.Root
-                  radius="full"
-                  value={chartView}
-                  onValueChange={(value) => setChartView(value as "load" | "ping")}
-                  size="2"
-                  className="node-detail-toggle"
-                >
-                  <SegmentedControl.Item value="load">
-                    {t("nodeCard.load")}
-                  </SegmentedControl.Item>
-                  <SegmentedControl.Item value="ping">
-                    {t("nodeCard.ping")}
-                  </SegmentedControl.Item>
-                </SegmentedControl.Root>
-              </div>
-              <div className="node-detail-chart-body">
-                {chartView === "load" ? (
+            <div className="node-detail-chart-grid node-detail-animate" style={{ ["--delay" as any]: "320ms" }}>
+              <div className="node-detail-chart-card is-dual">
+                <div className="node-detail-chart-header">
+                  <div>
+                    <div className="node-detail-section-title">{t("nodeCard.load")}</div>
+                    <div className="node-detail-chart-note">{copy("负载与资源变化趋势", "Load and resource trend")}</div>
+                  </div>
+                </div>
+                <div className="node-detail-chart-body">
                   <EnhancedLoadChart data={liveDataToRecords(uuid ?? "", recent)} />
-                ) : (
+                </div>
+              </div>
+
+              <div className="node-detail-chart-card is-dual">
+                <div className="node-detail-chart-header">
+                  <div>
+                    <div className="node-detail-section-title">{t("nodeCard.ping")}</div>
+                    <div className="node-detail-chart-note">{copy("区域链路延迟视图", "Regional latency view")}</div>
+                  </div>
+                </div>
+                <div className="node-detail-chart-body">
                   <PingChartV2 uuid={uuid ?? ""} />
-                )}
+                </div>
               </div>
             </div>
           </div>

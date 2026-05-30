@@ -1385,6 +1385,22 @@
   box-shadow: 0 18px 40px -32px rgba(15, 23, 42, 0.45);
 }
 
+.node-detail-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.node-detail-chart-card.is-dual {
+  min-height: 340px;
+}
+
+.node-detail-chart-note {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: rgba(170, 183, 213, 0.76);
+}
+
 .node-detail-chart-header {
   display: flex;
   align-items: center;
@@ -1479,6 +1495,10 @@
 
   .node-detail-latency-cell {
     font-size: 11px;
+  }
+
+  .node-detail-chart-grid {
+    grid-template-columns: 1fr;
   }
 }
 
