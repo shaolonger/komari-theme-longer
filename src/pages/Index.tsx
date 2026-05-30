@@ -33,6 +33,15 @@ type InsightRow = {
   sublabel?: string;
 };
 
+type SpotlightNode = {
+  uuid: string;
+  name: string;
+  region: string;
+  status: "online" | "warning" | "offline";
+  signal: string;
+  detail: string;
+};
+
 type MobileFilter = "all" | "critical" | "traffic" | "expiring";
 
 type MobileNodeEntry = {
@@ -118,6 +127,20 @@ const InsightSection = ({
       ))}
     </div>
   </div>
+);
+
+const SpotlightCard = ({ item }: { item: SpotlightNode }) => (
+  <article className={`nebula-spotlight-card is-${item.status}`}>
+    <div className="nebula-spotlight-card-head">
+      <div>
+        <div className="nebula-spotlight-card-region">{item.region}</div>
+        <div className="nebula-spotlight-card-name">{item.name}</div>
+      </div>
+      <span className={`nebula-spotlight-card-badge is-${item.status}`}>{item.status.toUpperCase()}</span>
+    </div>
+    <div className="nebula-spotlight-card-signal">{item.signal}</div>
+    <div className="nebula-spotlight-card-detail">{item.detail}</div>
+  </article>
 );
 
 const MobileStatusCard = ({
@@ -442,6 +465,50 @@ const Index = () => {
         : null,
     ].filter(Boolean) as InsightRow[];
 
+    const spotlightNodes = enrichedNodes
+      .map((entry) => {
+        const status: SpotlightNode["status"] = !entry.online
+          ? "offline"
+          : entry.cpu >= 80 || entry.mem >= 85 || entry.disk >= 90
+            ? "warning"
+            : "online";
+
+        const signal = !entry.online
+          ? copy("连接中断", "Connection interrupted")
+          : entry.cpu >= 80
+            ? copy("CPU 负载偏高", "CPU pressure elevated")
+            : entry.mem >= 85
+              ? copy("内存占用偏高", "Memory pressure elevated")
+              : entry.disk >= 90
+                ? copy("磁盘空间告急", "Disk capacity warning")
+                : copy("运行平稳", "Running stable");
+
+        const detail = !entry.online
+          ? copy("实时数据不可达", "Realtime telemetry unavailable")
+          : copy(
+              `CPU ${Math.round(entry.cpu)}% · MEM ${Math.round(entry.mem)}% · DSK ${Math.round(entry.disk)}%`,
+              `CPU ${Math.round(entry.cpu)}% · MEM ${Math.round(entry.mem)}% · DSK ${Math.round(entry.disk)}%`
+            );
+
+        const severity = status === "offline" ? 3 : status === "warning" ? 2 : 1;
+        return {
+          uuid: entry.node.uuid,
+          name: entry.node.name,
+          region: entry.node.region,
+          status,
+          signal,
+          detail,
+          severity,
+          traffic: entry.traffic,
+        };
+      })
+      .sort((left, right) => {
+        if (left.severity !== right.severity) return right.severity - left.severity;
+        return right.traffic - left.traffic;
+      })
+      .slice(0, 4)
+      .map(({ severity, traffic, ...item }) => item);
+
     return {
       onlineCount,
       offlineCount,
@@ -463,6 +530,7 @@ const Index = () => {
       expiringSoon,
       regionHealth,
       latestSignals,
+      spotlightNodes,
     };
   }, [copy, liveMap, liveData.online, nodeList, onlineSet]);
 
@@ -672,6 +740,33 @@ const Index = () => {
     <section className="nebula-home-shell" id="nebula-home-top">
       <Callouts />
 
+      <section className="nebula-surface nebula-command-header">
+        <div className="nebula-command-headline">
+          <div className="nebula-section-kicker">{copy("指挥舱", "Command Deck")}</div>
+          <h1>{copy("Nebula 全局监控中枢", "Nebula Global Monitoring Core")}</h1>
+          <p>
+            {copy(
+              "以实时信号、区域态势和节点健康为核心，快速定位风险并触发运维动作。",
+              "Track realtime signals, regional posture, and node health to detect risk and trigger operations faster."
+            )}
+          </p>
+        </div>
+        <div className="nebula-command-pills">
+          <div className="nebula-command-pill">
+            <span>{copy("实时链路", "Live Pipe")}</span>
+            <strong>{copy("已连接", "Connected")}</strong>
+          </div>
+          <div className="nebula-command-pill">
+            <span>{copy("刷新周期", "Refresh")}</span>
+            <strong>15s</strong>
+          </div>
+          <div className="nebula-command-pill">
+            <span>{copy("节点总量", "Fleet Size")}</span>
+            <strong>{totalCount}</strong>
+          </div>
+        </div>
+      </section>
+
       <div className="nebula-hero-grid">
         <HomeMetricCard
           label={copy("在线节点", "Online Nodes")}
@@ -722,6 +817,23 @@ const Index = () => {
           icon={<RefreshCcw size={20} />}
         />
       </div>
+
+      <section className="nebula-surface nebula-spotlight-panel">
+        <div className="nebula-panel-header">
+          <div>
+            <div className="nebula-section-kicker">{copy("重点节点", "Spotlight Nodes")}</div>
+            <h3 className="nebula-section-title">{copy("优先处理对象", "Priority candidates")}</h3>
+          </div>
+          <div className="nebula-section-note">
+            {copy("按离线、告警和流量强度自动排序。", "Auto-ranked by offline state, warning pressure, and traffic intensity.")}
+          </div>
+        </div>
+        <div className="nebula-spotlight-grid">
+          {dashboard.spotlightNodes.map((item) => (
+            <SpotlightCard key={item.uuid} item={item} />
+          ))}
+        </div>
+      </section>
 
       <div className="nebula-home-grid">
         <div className="nebula-home-main" id="nebula-home-nodes">
